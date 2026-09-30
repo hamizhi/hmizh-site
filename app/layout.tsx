@@ -1,0 +1,11 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "ChatGPT充值｜ChatGPT Plus/Pro国内购买·支付宝微信支付｜ChatGPT代充服务 - GETGPT Pro",
+  description: "ChatGPT Plus/Pro 国内购买与订阅服务，支持支付宝、微信支付。",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="zh-CN" suppressHydrationWarning><body>{children}</body></html>;
+}

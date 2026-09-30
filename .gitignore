@@ -1,0 +1,14 @@
+.env
+.env.local
+.env.*.local
+
+# Local dependencies and build output
+node_modules/
+.next/
+.next-stale-*/
+out/
+.wrangler/
+
+# Local extraction/build workspace
+work/
+outputs/

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Codex 登录要手机号验证怎么办？收不到验证码的排查步骤 | AIchongzhi.org</title>
+<meta name="description" content="Codex 登录要求手机号、短信验证码收不到或卡在 add-phone 页面怎么办？先区分账号登录、API Key、邮箱验证码与设备授权，再按步骤排查。说明已有 Plus 仍被验证时怎么处理，避免重复付费。">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="canonical" href="https://aichongzhi.org/blog/codex-phone-verification">
+<link rel="icon" type="image/jpeg" href="/favicon.jpg">
+<link rel="apple-touch-icon" href="/favicon.jpg">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="AIchongzhi.org">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:title" content="Codex 登录要手机号验证怎么办？收不到验证码的排查步骤">
+<meta property="og:description" content="Codex 登录要求手机号、短信验证码收不到或卡在 add-phone 页面怎么办？先区分账号登录、API Key、邮箱验证码与设备授权，再按步骤排查。说明已有 Plus 仍被验证时怎么处理，避免重复付费。">
+<meta property="og:url" content="https://aichongzhi.org/blog/codex-phone-verification">
+<meta property="og:image" content="https://aichongzhi.org/images/article-codex-phone-verification.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Codex 登录要手机号验证怎么办？收不到验证码的排查步骤">
+<meta property="article:published_time" content="2026-07-22">
+<meta property="article:modified_time" content="2026-09-15">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Codex 登录要手机号验证怎么办？收不到验证码的排查步骤">
+<meta name="twitter:description" content="Codex 登录要求手机号、短信验证码收不到或卡在 add-phone 页面怎么办？先区分账号登录、API Key、邮箱验证码与设备授权，再按步骤排查。说明已有 Plus 仍被验证时怎么处理，避免重复付费。">
+<meta name="twitter:image" content="https://aichongzhi.org/images/article-codex-phone-verification.jpg">
+<link rel="stylesheet" href="/css/site.css">
+<link rel="stylesheet" href="/css/nav-dropdown.css">
+<link rel="stylesheet" href="/css/wechat-support.css">
+<link rel="stylesheet" href="/css/pro-articles.css">
+<link rel="stylesheet" href="/css/tutorial-articles.css">
+<link rel="stylesheet" href="/css/analytics-consent.css">
+<script src="/js/analytics-consent.js"></script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BlogPosting",
+      "@id": "https://aichongzhi.org/blog/codex-phone-verification#article",
+      "url": "https://aichongzhi.org/blog/codex-phone-verification",
+      "headline": "Codex 登录要手机号验证怎么办？收不到验证码的排查步骤",
+      "description": "Codex 登录要求手机号、短信验证码收不到或卡在 add-phone 页面怎么办？先区分账号登录、API Key、邮箱验证码与设备授权，再按步骤排查。说明已有 Plus 仍被验证时怎么处理，避免重复付费。",
+      "image": {
+        "@type": "ImageObject",
+        "@id": "https://aichongzhi.org/blog/codex-phone-verification#primaryimage",
+        "url": "https://aichongzhi.org/images/article-codex-phone-verification.jpg",
+        "width": 1200,
+        "height": 630
+      },
+      "thumbnailUrl": "https://aichongzhi.org/images/article-codex-phone-verification.jpg",
+      "author": {
+        "@type": "Organization",
+        "@id": "https://aichongzhi.org/#editorial-team",
+        "name": "AIchongzhi.org 编辑部",
+        "url": "https://aichongzhi.org/about"
+      },
+      "publisher": {
+        "@id": "https://aichongzhi.org/#organization"
+      },
+      "datePublished": "2026-07-22",
+      "dateModified": "2026-09-15",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://aichongzhi.org/blog/codex-phone-verification"
+      },
+      "inLanguage": "zh-CN",
+      "articleSection": "Codex 使用指南"
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://aichongzhi.org/#organization",
+      "name": "AIchongzhi.org",
+      "url": "https://aichongzhi.org/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://aichongzhi.org/logo.png",
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://aichongzhi.org/blog/codex-phone-verification#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "首页",
+          "item": "https://aichongzhi.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "攻略",
+          "item": "https://aichongzhi.org/blog/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Codex 登录要手机号验证怎么办？收不到验证码的排查步骤",
+          "item": "https://aichongzhi.org/blog/codex-phone-verification"
+        }
+      ]
+    }
+  ]
+}</script>
+<script src="/js/nav-dropdown.js" defer></script>
+<script src="/js/wechat-support.js" defer></script>
+<script src="/js/register-sw.js" defer></script>
+</head>
+<body>
+<a class="pro-skip" href="#main">跳到正文</a>
+<nav class="nav-main" aria-label="主导航">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 12L9 6V18L3 12Z" fill="currentColor"/>
+                    <path d="M21 12L15 6V18L21 12Z" fill="currentColor" opacity="0.5"/>
+                </svg>
+                <span>AIchongzhi.org</span>
+            </a>
+            <div class="nav-links">
+                <a href="/chatgpt/">ChatGPT</a>
+                <a href="/gemini/">Gemini</a>
+                <a href="/claude/">Claude</a>
+                <a href="/grok/">Grok</a>
+                <a href="/blog/" class="active">攻略</a>
+                <div class="nav-tool">
+                    <button class="nav-tool-trigger" aria-haspopup="true" aria-expanded="false" type="button">
+                        工具
+                        <svg class="nav-tool-chevron" viewBox="0 0 16 16" fill="none">
+                            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="nav-tool-panel" role="menu">
+                        <a href="#" class="nav-tool-item is-placeholder" role="menuitem">
+                            <div class="nav-tool-item-icon">·</div>
+                            <div class="nav-tool-item-body">
+                                <div class="nav-tool-item-name">敬请期待</div>
+                                <div class="nav-tool-item-desc">第一批 AI 工具开发中</div>
+                            </div>
+                        </a>
+                        <div class="nav-tool-foot">// 工具陆续上线</div>
+                    </div>
+                </div>
+                <a href="/about">关于</a>
+            </div>
+            <div class="nav-actions">
+                <a href="/chatgpt/" class="btn btn-primary-new">查看套餐</a>
+            </div>
+        </div>
+    </nav>
+<main id="main" class="pro-page tutorial-page">
+<nav class="pro-breadcrumb" aria-label="面包屑"><a href="/">首页</a><span aria-hidden="true"> / </span><a href="/blog/">攻略</a><span aria-hidden="true"> / </span><span aria-current="page">Codex · 登录排查</span></nav>
+<article class="pro-article">
+<header><p class="pro-eyebrow">Codex · 登录排查</p><h1>Codex 登录要手机号验证怎么办？收不到验证码的排查步骤</h1>
+<p class="pro-meta"><a href="/about" rel="author">AIchongzhi.org 编辑部</a> · 首发：<time datetime="2026-07-22">2026-07-22</time> · 更新：<time datetime="2026-09-15">2026-09-15</time></p></header>
+<div class="pro-opening prose"><p><strong>先看清要求的是哪一种验证码，不要先重复购买 Plus。</strong>手机号、邮箱验证码和设备授权码不是一回事；升级会员也不是官方承诺的免验证办法。</p></div>
+<div class="pro-body prose"><p class="tutorial-background">使用 Codex 时，终端、浏览器和账号页面可能先后出现不同提示。“登录成功但回不到客户端”和“必须填写手机号”需要分别处理。即使 ChatGPT 网页能正常使用，也不能据此认定 Codex 当前授权已经完成；已有 Plus 也不意味着任何验证都会消失。下面按实际看到的页面分流，不把账号验证问题包装成充值后一定能解决的问题，也不建议为了反复尝试而重新付费。</p>
+<nav class="tutorial-toc" aria-label="本文目录"><strong>按当前提示排查</strong><a href="#verification-types">我遇到哪种验证</a><a href="#sms">短信收不到</a><a href="#steps">账号或授权不对</a><a href="#plus">买 Plus 能解决吗</a></nav>
+<section id="verification-types"><h2>先分清：你看到的是哪种验证？</h2>
+<ul><li><strong>要求填写手机号，或地址含 <code>add-phone</code>：</strong>说明当前流程停在手机号验证。不能只凭这一步认定你选错了 API 登录，也不要把它当作会员未到账。</li><li><strong>正在创建第一个 API Key：</strong><a href="https://help.openai.com/en/articles/8983040">OpenAI 手机验证说明</a>列出了首次创建 API Key 的手机号要求；Plus 不会自动取消它。</li><li><strong>要求邮箱验证码或 MFA：</strong>使用页面指定的邮箱或验证器，不要把短信码填进另一种验证框。</li><li><strong>终端显示 Device Code：</strong>这是设备授权码，按终端显示的官方网址完成授权，不是等待手机收到短信。</li></ul>
+<p class="tutorial-note">OpenAI 的一般账号说明不能替代你当前的验证页面。遇到额外验证，应完成页面要求或联系官方支持，不应假定“换登录方式就一定免验证”。</p></section>
+<section id="sms"><h2>手机号验证码收不到，按这个顺序检查</h2>
+<ol><li><strong>核对地址与区号：</strong>确认是 OpenAI 官方页面、国家区号和你能长期控制的手机号；不要在仿冒网页输入验证码。</li><li><strong>看清接收渠道：</strong>页面若写 WhatsApp，就检查 WhatsApp；短信验证则检查短信和运营商拦截。手机验证不能改成发到邮箱。</li><li><strong>暂停连续重发：</strong>按页面倒计时等待，收到多条时使用最新验证码。请求过密或登录被临时限制时，先停止重复尝试。</li><li><strong>仍然失败：</strong>记录时间、客户端版本和完整错误文字，向 <a href="https://help.openai.com/">OpenAI 支持</a>反馈。截图遮住手机号、邮箱和授权码；不要提交密码或登录凭据。</li></ol>
+<p>接收渠道依据 <a href="https://help.openai.com/en/articles/8983040">官方手机验证说明</a>。不建议使用临时接码号码，避免后续无法找回账号。</p></section>
+<section id="steps"><h2>登录了错误账号，或授权后没有返回 Codex？</h2>
+<p>先用原注册方式登录同一个 ChatGPT 账号。CLI 用户可以运行只读检查：</p>
+<pre><code>codex login status</code></pre>
+<p><strong>只有确认账号或认证方式错误，且需要重新授权时</strong>，再执行以下命令。退出会清除当前登录状态，不是解除手机号验证的命令。</p>
+<pre><code>codex logout
+codex login</code></pre>
+<p>浏览器中选择自己的 ChatGPT 账号完成登录。远程终端打不开浏览器或本地回调受阻时，如果账号或组织允许设备授权，可用 <code>codex login --device-auth</code>；这同样不会绕过账号验证。</p>
+<p>桌面端或 IDE 扩展先检查当前账号和登录方式；界面名称随版本变化。操作依据 <a href="https://learn.chatgpt.com/docs/auth">Codex 官方认证文档</a>。普通登录报错另见 <a href="https://help.openai.com/en/articles/7426629">OpenAI 登录故障说明</a>。</p></section>
+<section id="plus"><h2>升级 Plus 能解决 Codex 手机验证吗？</h2>
+<p><strong>不能保证，也不应只为免验证而购买。</strong>会员权益、登录认证和账号安全检查是不同问题。先把登录恢复正常，再决定是否需要更高用量，避免把充值当作解除验证的操作。</p>
+<p>如果登录已经正常，真正的问题是 Codex 用量不够，再看 <a href="/blog/chatgpt-plus-vs-pro">Plus 与 Pro 额度对比</a>。使用 ChatGPT 账号登录走对应订阅权益；使用 API Key 则另按 API 计费，见 <a href="https://learn.chatgpt.com/docs/pricing">官方方案说明</a>。</p></section>
+<section id="faq"><h2>已经是 Plus，还需要再充一次吗？</h2>
+<p>不要因验证提示重复充值。先确认登录的是付费账号，再处理验证；如果是本站订单未到账，可以联系本站核对。<strong>本站可以协助核对充值订单，但不能代替 OpenAI 解除账号安全验证。</strong></p></section></div>
+<p class="pro-service-note">更新说明：2026-09-15 修订。官方权益与验证以 OpenAI 文档和账号页面为准；人民币价格与交付条件以本站套餐及订单为准。本站为独立第三方，非 OpenAI 官方或授权服务商。<a href="/about">关于编辑与服务</a> · <a href="/terms">服务条款</a></p>
+</article>
+<aside class="pro-cta" aria-label="本站会员服务咨询">
+<div class="pro-cta-copy"><strong>需要核对本站充值订单？</strong><span>先发订单号和打码报错；不要发送密码、验证码或登录凭据。</span><span>客服微信：<code>gptpro5566</code></span></div>
+<div class="pro-cta-actions"><button type="button" class="wechat-copy" data-wechat-copy>复制微信咨询</button><a class="pro-plan-link" href="/blog/chatgpt-plus-guide#payment-help">查看会员未到账排查 →</a></div>
+</aside>
+<nav class="pro-related" aria-label="相关阅读"><h2>相关阅读</h2><ul><li><a href="/blog/chatgpt-plus-guide">ChatGPT Plus 付费后还是 Free 怎么办？</a></li><li><a href="/blog/chatgpt-plus-vs-pro">登录正常但用量不足？比较 Plus 和 Pro</a></li></ul><a href="/blog/">返回全部攻略 →</a></nav>
+</main>
+<footer class="footer-main">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <a href="/" class="footer-logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M3 12L9 6V18L3 12Z" fill="currentColor"/>
+                        <path d="M21 12L15 6V18L21 12Z" fill="currentColor" opacity="0.5"/>
+                    </svg>
+                    <span>AIchongzhi.org</span>
+                </a>
+                <p class="footer-tagline">让 AI 伴你向上生长 · ChatGPT · Claude · Gemini · Grok 一站式代充</p>
+            </div>
+            <nav class="footer-cols" aria-label="Footer 导航">
+                <div class="footer-col">
+                    <h4>充值服务</h4>
+                    <a href="/chatgpt/">ChatGPT Plus</a>
+                    <a href="/claude/">Claude Pro</a>
+                    <a href="/gemini/">Gemini AI Pro</a>
+                    <a href="/grok/">Grok</a>
+                </div>
+                <div class="footer-col">
+                    <h4>资源</h4>
+                    <a href="/blog/">攻略</a>
+                    <a href="/blog/chatgpt-plus-guide">ChatGPT Plus 指南</a>
+                </div>
+                <div class="footer-col">
+                    <h4>关于</h4>
+                    <a href="/about">关于我们</a>
+                    <a href="/privacy">隐私政策</a>
+                    <a href="/terms">服务条款</a>
+                </div>
+                <div class="footer-col">
+                    <h4>联系</h4>
+                    <span class="footer-contact-static">客服微信</span>
+                    <code class="footer-wechat">gptpro5566</code>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-inner">
+                <p>© 2024–2026 AIchongzhi.org. 本站仅提供技术服务，与 OpenAI / Anthropic / Google / xAI 无关联关系。</p>
+            </div>
+        </div>
+    </footer>
+<div class="wechat-notice" role="status" aria-live="polite" aria-atomic="true"></div>
+</body>
+</html>

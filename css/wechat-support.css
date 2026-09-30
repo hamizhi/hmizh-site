@@ -1,0 +1,75 @@
+/* Shared, high-visibility WeChat support for home and product pages. */
+.wechat-support {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 640px;
+    margin: 1.5rem auto 0;
+    padding: 1.25rem;
+    border: 1px solid #5be397;
+    border-radius: 18px;
+    background: linear-gradient(120deg, #ecfff1, #d0fbe2);
+    color: #12422c;
+    box-shadow: 0 10px 30px rgb(10 156 78 / 12%);
+    text-align: left;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.wechat-support__intro { display: flex; align-items: center; gap: 12px; }
+.wechat-support__icon { display: grid; place-items: center; flex: 0 0 44px; height: 44px; border-radius: 13px; background: #05b65a; color: #fff; }
+.wechat-support__icon svg { width: 28px; height: 28px; }
+.wechat-support .wechat-support__title { margin: 0; color: #104b2f; font: 750 18px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; letter-spacing: 0; }
+.wechat-support__desc { margin: 3px 0 0; font-size: 14px; line-height: 1.6; color: #38604b; }
+.wechat-support__actions { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 16px; }
+.wechat-support__account { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+.wechat-support__account span { font-size: 14px; }
+.wechat-support__account code { color: #104b2f; font: 750 22px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .03em; user-select: all; }
+button.wechat-copy { flex-shrink: 0; min-height: 46px; padding: 11px 20px; border: 1px solid #07813d; border-radius: 10px; background: #087c3b; color: #fff; cursor: pointer; font: 700 15px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; box-shadow: 0 4px 12px rgb(0 100 42 / 16%); }
+button.wechat-copy:hover { background: #056430; }
+.wechat-support__tip { margin: 10px 0 0; color: #38604b; font-size: 14px; line-height: 1.6; }
+/* Stronger home-page support card, scoped to preserve existing site styles. */
+.contact-card.wechat-contact { background: #e4ffed; border: 2px solid #48d47f; box-shadow: 0 12px 32px rgb(0 160 70 / 12%); }
+.wechat-contact .contact-card-title { color: #104b2f; }
+.wechat-contact .contact-card-eyebrow { color: #087c3b; font-size: 14px; }
+.wechat-contact .contact-card-desc, .wechat-contact .contact-card-tip { color: #38604b; font-size: 14px; }
+.wechat-contact .contact-wechat-id { color: #104b2f; background: #fff; border-color: #8adfac; font-size: 20px; text-overflow: clip; overflow: visible; flex: 1 0 150px; }
+button.wechat-float {
+    position: fixed;
+    right: max(20px, env(safe-area-inset-right));
+    bottom: max(20px, env(safe-area-inset-bottom));
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: calc(100vw - 32px);
+    min-height: 64px;
+    padding: 12px 18px;
+    border: 2px solid #087c3b;
+    border-radius: 16px;
+    background: #13db6a;
+    color: #073f24;
+    box-shadow: 0 8px 26px rgb(5 100 47 / 25%);
+    cursor: pointer;
+    text-align: left;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.wechat-float svg { width: 28px; height: 28px; flex-shrink: 0; }
+.wechat-float strong, .wechat-float small { display: block; line-height: 1.5; }
+.wechat-float strong { font-size: 17px; font-weight: 800; }
+.wechat-float small { font-size: 13px; font-weight: 600; }
+button.wechat-float:hover { background: #45ec87; }
+.wechat-copy:focus-visible, .wechat-float:focus-visible { outline: 3px solid #145eff; outline-offset: 4px; }
+/* Do not cover Cookie choices or the last footer links. */
+body:has(.wechat-float) { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
+body:has(.analytics-consent:not([hidden])) .wechat-float { visibility: hidden; }
+.wechat-notice { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); z-index: 80; width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 16px 22px; border: 1px solid #55db91; border-radius: 14px; background: #064e2b; color: #fff; box-shadow: 0 8px 28px rgb(0 0 0 / 18%); font: 600 16px/1.65 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; text-align: center; }
+.wechat-notice:empty { display: none; }
+@media (max-width: 520px) {
+    .wechat-support { padding: 16px; }
+    .wechat-support__intro { align-items: flex-start; }
+    .wechat-support__actions { flex-direction: column; align-items: stretch; gap: 10px; }
+    .wechat-support__account { justify-content: center; }
+    button.wechat-float { right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); min-height: 58px; padding: 9px 14px; }
+    .wechat-float strong { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wechat-support, .wechat-copy, .wechat-float { animation: none; transition: none; }
+}
