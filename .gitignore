@@ -9,6 +9,9 @@ node_modules/
 out/
 .wrangler/
 
+# Local SQLite database
+data/
+
 # Local extraction/build workspace
 work/
 outputs/
