@@ -69,7 +69,7 @@ export default function PurchasePage() {
 
   const plan = PLANS[selectedPlanId];
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const phoneRegex = /^1[3-9]\d{9}$/;
 
@@ -89,16 +89,36 @@ export default function PurchasePage() {
     }
 
     setLoading(true);
-    const orderDraft = {
-      planId: plan.id,
-      planTitle: plan.title,
-      price: plan.price,
-      phone,
-      payType,
-      createdAt: Date.now(),
-    };
-    sessionStorage.setItem("current_order_draft", JSON.stringify(orderDraft));
-    router.push(`/pay?plan=${plan.id}&phone=${phone}&type=${payType}`);
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: plan.id, phone }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        alert(data.message || "创建订单失败");
+        return;
+      }
+
+      const orderDraft = {
+        orderId: data.orderId,
+        planId: plan.id,
+        planTitle: plan.title,
+        price: plan.price,
+        phone,
+        payType,
+        createdAt: Date.now(),
+      };
+      sessionStorage.setItem("current_order_draft", JSON.stringify(orderDraft));
+      router.push(`/pay?order_id=${encodeURIComponent(data.orderId)}`);
+    } catch {
+      alert("网络连接异常，请稍后重试");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

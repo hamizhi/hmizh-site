@@ -8,7 +8,6 @@ export function generateStaticParams() {
   const paths = new Set([
     ...Object.keys(pages).filter((path) => !reservedRoutes.has(path)),
     "business-recharge",
-    "purchase",
     "purchase-go",
     "purchase-gptpro",
     "order",

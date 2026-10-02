@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  ArrowUpRight, BookOpen, ChevronDown, CircleHelp, ListChecks, Menu, Wrench, X,
+  ArrowUpRight, BookOpen, ChevronDown, CircleHelp, KeyRound, ListChecks, Menu, Wrench, X,
 } from "lucide-react";
 
 const links = [
@@ -39,8 +39,8 @@ export default function SiteHeader() {
         </div>
         {links.slice(2).map(([label, href]) => <a key={href} className="nav-link" href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noopener noreferrer" : undefined}>{label}{href.startsWith("http") && <ArrowUpRight className="h-3.5 w-3.5 text-slate-400" />}</a>)}
       </nav>
-      <div className="flex items-center gap-2"><a href="/order" className="nav-link"><ListChecks className="h-4 w-4" />查询订单</a><button type="button" aria-label="打开导航菜单" aria-expanded={mobile} className="rounded-lg border border-slate-200 p-2 lg:hidden" onClick={() => setMobile(!mobile)}>{mobile ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button></div>
+      <div className="flex items-center gap-2"><a href="/redeem" className="nav-link"><KeyRound className="h-4 w-4" />卡密兑换</a><a href="/order" className="nav-link"><ListChecks className="h-4 w-4" />查询订单</a><button type="button" aria-label="打开导航菜单" aria-expanded={mobile} className="rounded-lg border border-slate-200 p-2 lg:hidden" onClick={() => setMobile(!mobile)}>{mobile ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</button></div>
     </div>
-    {mobile && <nav className="border-t border-slate-100 bg-white px-4 py-3 lg:hidden" aria-label="移动导航">{[...links, ...guides.map(({ label, href }) => [label, href]), ["查询订单", "/order"]].map(([label, href]) => <a key={href} href={href} className="block rounded-lg px-3 py-3 text-sm text-slate-700 hover:bg-slate-50">{label}</a>)}</nav>}
+    {mobile && <nav className="border-t border-slate-100 bg-white px-4 py-3 lg:hidden" aria-label="移动导航">{[...links, ...guides.map(({ label, href }) => [label, href]), ["卡密兑换", "/redeem"], ["查询订单", "/order"]].map(([label, href]) => <a key={href} href={href} className="block rounded-lg px-3 py-3 text-sm text-slate-700 hover:bg-slate-50">{label}</a>)}</nav>}
   </header>;
 }

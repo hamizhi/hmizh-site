@@ -13,19 +13,37 @@ import {
 } from "lucide-react";
 
 export default function RechargePage() {
-  const [card, setCard] = useState("QWER-J5R6-3KC3-T0A6");
-  const [orderNo, setOrderNo] = useState("GETGPT20260930152438");
+  const [card, setCard] = useState("");
+  const [orderNo, setOrderNo] = useState("");
   const [copied, setCopied] = useState(false);
   const [cardStatus, setCardStatus] = useState<"verifying" | "valid">("verifying");
   const [confirmed, setConfirmed] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setCard(params.get("card") || "QWER-J5R6-3KC3-T0A6");
-    setOrderNo(params.get("order_no") || "GETGPT20260930152438");
-    const timer = window.setTimeout(() => setCardStatus("valid"), 1200);
-    return () => window.clearTimeout(timer);
+    const currentOrderId = params.get("order_id");
+    const raw = sessionStorage.getItem("current_order_draft");
+    const draft = raw ? (JSON.parse(raw) as { phone?: string }) : null;
+    if (!currentOrderId || !draft?.phone) {
+      setError("缺少订单信息，请从支付页面进入。");
+      return;
+    }
+
+    fetch(`/api/orders/${encodeURIComponent(currentOrderId)}?phone=${encodeURIComponent(draft.phone)}`, { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || !data.success || data.order.status !== "paid" || !data.order.cardCode) {
+          throw new Error("订单尚未完成支付或卡密还未分配");
+        }
+        setOrderNo(data.order.orderId);
+        setCard(data.order.cardCode);
+        setCardStatus("valid");
+      })
+      .catch((reason: unknown) => {
+        setError(reason instanceof Error ? reason.message : "订单查询失败");
+      });
   }, []);
 
   const copyCard = async () => {
@@ -61,6 +79,13 @@ export default function RechargePage() {
           </div>
         </div>
 
+        {error ? (
+          <section className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 p-6 text-center shadow-sm sm:p-8">
+            <h1 className="text-xl font-black text-amber-900">暂时无法显示卡密</h1>
+            <p className="mt-2 text-sm text-amber-800">{error}</p>
+            <Link href="/plus-price" className="mt-5 inline-flex rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white">返回套餐页</Link>
+          </section>
+        ) : (
         <section className="mb-6 rounded-3xl border border-gray-200/90 bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-2.5 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
@@ -82,6 +107,7 @@ export default function RechargePage() {
           </div>
           <div className="mt-3 text-center text-[11px] text-gray-400">订单号：{orderNo}</div>
         </section>
+        )}
 
         {!finished ? (
           <section className="rounded-3xl border border-gray-200/90 bg-white p-6 shadow-sm sm:p-8">

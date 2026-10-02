@@ -1,7 +1,11 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import {
+  deleteUnusedCard,
+  getAdminData,
+  importCards,
+} from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -34,62 +38,8 @@ export async function POST(req: Request) {
     }
 
     if (body.action === "get_data") {
-      const stats = {
-        totalRevenue: (
-          db
-            .prepare(
-              "SELECT COALESCE(SUM(money), 0) as total FROM orders WHERE status = 'paid'",
-            )
-            .get() as { total: number }
-        ).total,
-        todayRevenue: (
-          db
-            .prepare(
-              "SELECT COALESCE(SUM(money), 0) as total FROM orders WHERE status = 'paid' AND date(paid_at) = date('now')",
-            )
-            .get() as { total: number }
-        ).total,
-        totalOrders: (
-          db.prepare("SELECT COUNT(*) as total FROM orders").get() as {
-            total: number;
-          }
-        ).total,
-        paidOrders: (
-          db
-            .prepare("SELECT COUNT(*) as total FROM orders WHERE status = 'paid'")
-            .get() as { total: number }
-        ).total,
-        stockPlus: (
-          db
-            .prepare(
-              "SELECT COUNT(*) as count FROM cards WHERE plan_id = 'plus' AND is_used = 0",
-            )
-            .get() as { count: number }
-        ).count,
-        stockPro: (
-          db
-            .prepare(
-              "SELECT COUNT(*) as count FROM cards WHERE plan_id = 'pro' AND is_used = 0",
-            )
-            .get() as { count: number }
-        ).count,
-        stockAccount: (
-          db
-            .prepare(
-              "SELECT COUNT(*) as count FROM cards WHERE plan_id = 'account' AND is_used = 0",
-            )
-            .get() as { count: number }
-        ).count,
-      };
-
-      const orders = db
-        .prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 100")
-        .all();
-      const cards = db
-        .prepare("SELECT * FROM cards ORDER BY created_at DESC LIMIT 200")
-        .all();
-
-      return NextResponse.json({ success: true, stats, orders, cards });
+      const data = await getAdminData();
+      return NextResponse.json({ success: true, ...data });
     }
 
     if (body.action === "import_cards") {
@@ -105,20 +55,7 @@ export async function POST(req: Request) {
         .map((cardCode) => cardCode.trim())
         .filter(Boolean);
 
-      const insertStmt = db.prepare(`
-        INSERT OR IGNORE INTO cards (plan_id, card_code, is_used)
-        VALUES (?, ?, 0)
-      `);
-
-      let count = 0;
-      const insertMany = db.transaction((items: string[]) => {
-        for (const cardCode of items) {
-          const result = insertStmt.run(body.planId, cardCode);
-          if (result.changes > 0) count += 1;
-        }
-      });
-
-      insertMany(list);
+      const count = await importCards(body.planId, list);
 
       return NextResponse.json({
         success: true,
@@ -134,9 +71,7 @@ export async function POST(req: Request) {
         );
       }
 
-      db.prepare("DELETE FROM cards WHERE id = ? AND is_used = 0").run(
-        body.cardId,
-      );
+      await deleteUnusedCard(body.cardId);
 
       return NextResponse.json({ success: true, message: "删除成功" });
     }

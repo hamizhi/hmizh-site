@@ -115,10 +115,10 @@ const PLANS = [
     name: "ChatGPT Plus",
     tag: "最受欢迎 · 推荐",
     badge: "热销推荐",
-    price: "188",
+    price: "169",
     period: "/ 月",
-    originalPrice: "210",
-    dailyPrice: "折合每天仅需 ¥6.2",
+    originalPrice: "199",
+    dailyPrice: "限时优惠价 ¥169",
     description: "解锁 GPT-4o、o1 满血版，日常办公与深度学习首选",
     features: [
       "包含 GPT-4o / o1 / Canvas / 高清作图全功能",
@@ -569,8 +569,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => alert(`已选择 ${plan.name}`)}
+                <Link
+                  href={`/purchase?plan=${plan.id}`}
                   className={`w-full py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
                     plan.popular
                       ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/25 active:scale-98"
@@ -578,7 +578,7 @@ export default function Home() {
                   }`}
                 >
                   立即购买
-                </button>
+                </Link>
               </div>
             ))}
           </div>

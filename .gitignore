@@ -16,3 +16,4 @@ data/
 # Local extraction/build workspace
 work/
 outputs/
+.next-*
