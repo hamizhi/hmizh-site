@@ -26,15 +26,17 @@ export type AdminStats = {
   todayRevenue: number;
   totalRevenue: number;
   totalOrders: number;
+  stockGo: number;
   paidOrders: number;
   stockPlus: number;
+  stockPro5x: number;
   stockPro: number;
   stockAccount: number;
 };
 
 export type CreateOrderInput = {
   phone: string;
-  planId: "plus" | "pro" | "account";
+  planId: "go" | "plus" | "pro-5x" | "pro" | "account";
   planName: string;
   money: number;
 };
@@ -58,7 +60,9 @@ export async function getAdminData(): Promise<{
     allOrdersResult,
     paidOrdersResult,
     todayOrdersResult,
+    goStockResult,
     plusStockResult,
+    pro5xStockResult,
     proStockResult,
     accountStockResult,
     ordersResult,
@@ -71,6 +75,16 @@ export async function getAdminData(): Promise<{
       .select("money")
       .eq("status", "paid")
       .gte("paid_at", todayStart.toISOString()),
+    supabase
+      .from("cards")
+      .select("id", { count: "exact", head: true })
+      .eq("plan_id", "pro-5x")
+      .eq("is_used", 0),
+    supabase
+      .from("cards")
+      .select("id", { count: "exact", head: true })
+      .eq("plan_id", "go")
+      .eq("is_used", 0),
     supabase
       .from("cards")
       .select("id", { count: "exact", head: true })
@@ -104,7 +118,9 @@ export async function getAdminData(): Promise<{
     allOrdersResult,
     paidOrdersResult,
     todayOrdersResult,
+    goStockResult,
     plusStockResult,
+    pro5xStockResult,
     proStockResult,
     accountStockResult,
     ordersResult,
@@ -143,7 +159,9 @@ export async function getAdminData(): Promise<{
       ),
       totalOrders: allOrders.length,
       paidOrders: paidOrders.length,
+      stockGo: goStockResult.count ?? 0,
       stockPlus: plusStockResult.count ?? 0,
+      stockPro5x: pro5xStockResult.count ?? 0,
       stockPro: proStockResult.count ?? 0,
       stockAccount: accountStockResult.count ?? 0,
     },

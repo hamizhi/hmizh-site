@@ -5,9 +5,17 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 const PLANS = {
+  go: {
+    title: "ChatGPT Go / 月",
+    price: 49,
+  },
   plus: {
     title: "ChatGPT Plus 一键升级 / 月",
-    price: 169,
+    price: 149,
+  },
+  "pro-5x": {
+    title: "ChatGPT Pro $100/$200/$500",
+    price: 720,
   },
   pro: {
     title: "ChatGPT Pro 充值 (5x / 20x)",

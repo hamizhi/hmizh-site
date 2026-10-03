@@ -111,59 +111,60 @@ const REVIEWS_ROW_2 = [
 // 套餐定价数据（已精细调整比例，绝不过大）
 const PLANS = [
   {
+    id: "go",
+    name: "ChatGPT Go",
+    tag: "新用户首选",
+    badge: "新用户首选",
+    price: "49",
+    period: "/ 月",
+    originalPrice: "49",
+    dailyPrice: "新用户首选",
+    description: "使用更多核心智能额度，写作、了解、创建和聊天都更多。",
+    features: [
+      "更多使用工具的消息额度",
+      "更多图像创建额度",
+      "更多记忆和存储空间",
+      "更多语音聊天额度",
+    ],
+    popular: false,
+  },
+  {
     id: "plus",
     name: "ChatGPT Plus",
     tag: "最受欢迎 · 推荐",
     badge: "热销推荐",
-    price: "169",
+    price: "149",
     period: "/ 月",
     originalPrice: "199",
-    dailyPrice: "限时优惠价 ¥169",
-    description: "解锁 GPT-4o、o1 满血版，日常办公与深度学习首选",
+    dailyPrice: "限时优惠价 ¥149",
+    description: "解锁高级智能，越用越懂你的偏好",
     features: [
-      "包含 GPT-4o / o1 / Canvas / 高清作图全功能",
-      "高峰时段优先访问，极速无排队响应通道",
-      "支持 Codex 编码助手轻量任务处理",
-      "全自动极速发卡，附送保姆级图文激活教程",
-      "官方正版苹果礼品卡通道，100% 账号零风险",
+      "面向复杂工作的高级智能",
+      "更高质量的图像生成",
+      "工作智能体可跨应用和文件执行操作",
+      "用 Codex 自动化编码",
+      "个人理财和数据分析工具",
+      "支持开具正规采购凭证/收据用于财务报销",
     ],
     popular: true,
   },
   {
     id: "pro-5x",
-    name: "ChatGPT Pro (5x)",
-    tag: "专业开发 / 科研",
+    name: "ChatGPT Pro $100/$200/$500",
+    tag: "企业与开发者高频首选",
     badge: "算力升级",
-    price: "799",
-    period: "/ 月",
-    originalPrice: "850",
-    dailyPrice: "企业与开发者高频首选",
-    description: "适合复杂代码工程、长文本论文与重度科研分析",
+    price: "720",
+    period: "起 / 月",
+    originalPrice: "720",
+    dailyPrice: "ChatGPT Pro $100 / $200 / $500",
+    description: "面向在整个工作日都依赖我们最强智能的用户",
     features: [
-      "包含 Plus 全部功能与更高调用上限",
-      "开放 Pro 级别深度推理模型权限",
-      "5 倍相对 Codex 任务额度档位",
-      "专属客服一对一跟进交付与质保",
+      "我们最强大的前沿 Pro 模型",
+      "Dots，你的全天候在线智能体",
+      "更多工作模式和 Codex 使用额度",
+      "抢先体验新工具和模型",
+      "提供 3 档使用额度",
       "支持开具正规采购凭证/收据用于财务报销",
-    ],
-    popular: false,
-  },
-  {
-    id: "pro-20x",
-    name: "ChatGPT Pro (20x)",
-    tag: "企业顶配 / 满血算力",
-    badge: "限额开放",
-    price: "1580",
-    period: "/ 月",
-    originalPrice: "1699",
-    dailyPrice: "极客与高强度研发团队专用",
-    description: "面向全天候重度 AI 开发者与全功能生产力团队",
-    features: [
-      "超大上下文窗口与满血高强度推理",
-      "最高档位 20x Codex / Astra 并行任务",
-      "优先体验 OpenAI 最新实验性前沿模型",
-      "独立企业级通道稳定续费无中断",
-      "专属 VIP 7x24 小时极速技术响应",
     ],
     popular: false,
   },
@@ -281,7 +282,7 @@ export default function Home() {
             </div>
             <div>
               <div className="font-bold text-lg tracking-[-0.5px] text-[#111827] leading-tight">
-                GETGPT <span className="text-indigo-600">Pro</span>
+                GPT <span className="text-indigo-600">Pro</span>
               </div>
               <div className="text-[11px] text-gray-400 font-normal leading-tight">
                 ChatGPT 订阅服务
@@ -507,11 +508,11 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 items-stretch">
+          <div className="grid items-stretch gap-6 md:grid-cols-3">
             {PLANS.map((plan) => (
               <div
                 key={plan.id}
-                className={`relative rounded-3xl p-6 sm:p-7 flex flex-col justify-between cursor-pointer transition-all duration-300 hover:-translate-y-2 ${
+                className={`relative flex flex-col justify-between rounded-3xl p-6 sm:p-7 cursor-pointer transition-all duration-300 hover:-translate-y-2 ${
                   plan.popular
                     ? "bg-white border-2 border-indigo-600 shadow-[0_8px_30px_-5px_rgba(99,102,241,0.15)] ring-4 ring-indigo-50 hover:shadow-[0_20px_40px_-10px_rgba(99,102,241,0.25)]"
                     : "bg-white border border-gray-200 hover:border-gray-300 hover:shadow-xl"
@@ -539,7 +540,7 @@ export default function Home() {
                     {plan.dailyPrice}
                   </div>
 
-                  <p className="text-gray-500 text-xs sm:text-sm mb-5 h-9 leading-relaxed font-normal">
+                  <p className="text-gray-500 text-xs sm:text-sm mb-3 leading-relaxed font-normal">
                     {plan.description}
                   </p>
 
@@ -551,9 +552,11 @@ export default function Home() {
                     <span className="text-xs text-gray-400 ml-1">
                       {plan.period}
                     </span>
-                    <span className="ml-2 text-xs text-gray-400 line-through">
-                      ¥{plan.originalPrice}
-                    </span>
+                    {plan.originalPrice !== plan.price && (
+                      <span className="ml-2 text-xs text-gray-400 line-through">
+                        ¥{plan.originalPrice}
+                      </span>
+                    )}
                   </div>
 
                   <div className="space-y-2.5 pt-5 border-t border-gray-100 mb-6">
@@ -571,7 +574,7 @@ export default function Home() {
 
                 <Link
                   href={`/purchase?plan=${plan.id}`}
-                  className={`w-full py-3 rounded-xl font-bold text-sm transition-all duration-200 ${
+                  className={`flex w-full items-center justify-center rounded-xl py-3 text-center font-bold text-sm transition-all duration-200 ${
                     plan.popular
                       ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/25 active:scale-98"
                       : "bg-gray-100 hover:bg-gray-200 text-[#111827] active:scale-98"

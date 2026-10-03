@@ -183,12 +183,12 @@ export default function PlusPricePage() {
               <div className="mb-2 flex items-baseline gap-1.5">
                 <span className="text-lg font-black text-[#111827]">¥</span>
                 <span className="text-4xl font-black leading-none tracking-[-1.5px] text-[#111827] sm:text-[42px]">
-                  169
+                  149
                 </span>
                 <span className="text-xs font-medium text-gray-400">/ 月</span>
                 <span className="ml-1 text-xs text-gray-400 line-through">¥199</span>
                 <span className="ml-1 rounded bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-500">
-                  立省 ¥30
+                  立省 ¥50
                 </span>
               </div>
               <p className="mb-5 text-xs font-normal leading-relaxed text-gray-500">

@@ -15,7 +15,7 @@ type Draft = {
 };
 
 const PRICE_MAP: Record<string, { title: string; price: number }> = {
-  plus: { title: "ChatGPT Plus 一键升级 / 月", price: 169 },
+  plus: { title: "ChatGPT Plus 一键升级 / 月", price: 149 },
   pro: { title: "ChatGPT Pro 充值 (5x / 20x)", price: 879 },
   account: { title: "ChatGPT Plus 新号成品", price: 189 },
 };

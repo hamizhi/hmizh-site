@@ -19,7 +19,9 @@ type Stats = {
   totalRevenue: number;
   totalOrders: number;
   paidOrders: number;
+  stockGo: number;
   stockPlus: number;
+  stockPro5x: number;
   stockPro: number;
   stockAccount: number;
 };
@@ -225,7 +227,9 @@ export default function AdminPage() {
               实时剩余库存
             </div>
             <div className="space-y-1 text-xs">
+              <StockRow label="Go" value={stats?.stockGo ?? 0} />
               <StockRow label="Plus 升级" value={stats?.stockPlus ?? 0} />
+              <StockRow label="Pro $100/$200/$500" value={stats?.stockPro5x ?? 0} />
               <StockRow label="Pro 充值" value={stats?.stockPro ?? 0} />
               <StockRow label="Plus 成品号" value={stats?.stockAccount ?? 0} />
             </div>
@@ -251,7 +255,9 @@ export default function AdminPage() {
                 onChange={(event) => setImportPlan(event.target.value)}
                 className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-sm"
               >
+                <option value="go">ChatGPT Go (go)</option>
                 <option value="plus">ChatGPT Plus 升级 (plus)</option>
+                <option value="pro-5x">ChatGPT Pro $100/$200/$500 (pro-5x)</option>
                 <option value="pro">ChatGPT Pro 充值 (pro)</option>
                 <option value="account">ChatGPT Plus 成品号 (account)</option>
               </select>
