@@ -245,7 +245,7 @@ export default function PurchasePage() {
                       {key === "go" ? "Go" : key === "plus" ? "Plus" : "Pro"}
                     </div>
                     <div className="relative mt-0.5 text-base font-black text-indigo-400">
-                      ¥{item.price || (item.tiers ? item.tiers[0].price : 0)}
+                      ¥{"price" in item ? item.price : ("tiers" in item && item.tiers ? item.tiers[0].price : 0)}
                       {key === "pro" && <span className="text-xs font-normal text-slate-400"> 起</span>}
                     </div>
                   </button>
@@ -256,7 +256,7 @@ export default function PurchasePage() {
 
           <div className="my-6 border-y border-slate-700/50 py-5">
             {/* Pro 档位选择器 - 灵动岛风格 */}
-            {selectedPlanId === "pro" && plan.tiers && (
+            {selectedPlanId === "pro" && "tiers" in plan && (
               <div className="mb-6 flex justify-center">
                 <div className="relative bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 rounded-full px-1 py-1 shadow-2xl shadow-black/40">
                   {/* 滑动背景指示器 */}
