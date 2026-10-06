@@ -79,6 +79,9 @@ export async function issueCdk(
 
     const data = await response.json();
 
+    // 调试：打印实际返回数据
+    console.log("ZovoCard API Response:", JSON.stringify(data, null, 2));
+
     if (!response.ok) {
       return {
         success: false,
@@ -87,16 +90,19 @@ export async function issueCdk(
       };
     }
 
-    // 成功响应格式: { code: 200, data: { codes: ["CDK1", "CDK2"] } }
-    const codes = data.data?.codes || data.codes;
+    // ZovoCard 返回格式: { code: 0, data: { issued: [{ code: "CDK", ... }], requested: 1 }, msg: "ok" }
+    const issued = data.data?.issued;
 
-    if (!Array.isArray(codes) || codes.length === 0) {
+    if (!Array.isArray(issued) || issued.length === 0) {
       return {
         success: false,
-        error: "发码成功但未返回卡密",
+        error: `发码失败。返回数据: ${JSON.stringify(data)}`,
         errorCode: "no_codes_returned",
       };
     }
+
+    // 提取 code 字段
+    const codes = issued.map((item: { code: string }) => item.code);
 
     return {
       success: true,
