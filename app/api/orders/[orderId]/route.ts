@@ -10,10 +10,10 @@ export async function GET(
 ) {
   try {
     const { orderId } = await params;
-    const phone = new URL(request.url).searchParams.get("phone");
+    const email = new URL(request.url).searchParams.get("email");
     const order = await getOrderForPayment(orderId);
 
-    if (!order || !phone || order.phone !== phone) {
+    if (!order || !email || order.email !== email) {
       return NextResponse.json(
         { success: false, message: "订单不存在" },
         { status: 404 },

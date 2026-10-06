@@ -32,17 +32,17 @@ type PlanId = keyof typeof PLANS;
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
-      phone?: string;
+      email?: string;
       planId?: string;
     };
 
-    const phone = body.phone?.trim() ?? "";
+    const email = body.email?.trim() ?? "";
     const planId = body.planId as PlanId;
     const plan = PLANS[planId];
 
-    if (!/^1[3-9]\d{9}$/.test(phone)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
-        { success: false, message: "请输入正确的 11 位手机号码" },
+        { success: false, message: "请输入正确的邮箱地址" },
         { status: 400 },
       );
     }
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     const orderId = await createPendingOrder({
-      phone,
+      email,
       planId,
       planName: plan.title,
       money: plan.price,

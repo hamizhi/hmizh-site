@@ -94,7 +94,7 @@ export default function PurchasePage() {
   const router = useRouter();
   const [selectedPlanId, setSelectedPlanId] = useState<PlanId>("plus");
   const [proTier, setProTier] = useState("5x"); // Pro 套餐档位选择
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [payType, setPayType] = useState<PayType>("alipay");
   const [agree, setAgree] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -139,10 +139,10 @@ export default function PurchasePage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const phoneRegex = /^1[3-9]\d{9}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!phoneRegex.test(phone)) {
-      alert("请填写正确的 11 位大陆手机号码，以便接收卡密与订单售后！");
+    if (!emailRegex.test(email)) {
+      alert("请填写正确的邮箱地址，以便接收卡密与订单售后！");
       return;
     }
 
@@ -157,7 +157,7 @@ export default function PurchasePage() {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: plan.id, phone }),
+        body: JSON.stringify({ planId: plan.id, email }),
       });
       const data = await response.json();
 
@@ -171,7 +171,7 @@ export default function PurchasePage() {
         planId: plan.id,
         planTitle: plan.title,
         price: getCurrentPrice(),
-        phone,
+        email,
         payType,
         createdAt: Date.now(),
       };
@@ -208,7 +208,7 @@ export default function PurchasePage() {
               </div>
             </div>
           </Link>
-          <Link href="/plus-price" className="flex items-center gap-1 text-xs font-medium text-slate-400 transition-colors hover:text-white">
+          <Link href="/#pricing" className="flex items-center gap-1 text-xs font-medium text-slate-400 transition-colors hover:text-white">
             <ArrowLeft className="h-3.5 w-3.5" />
             返回方案列表
           </Link>
@@ -325,21 +325,20 @@ export default function PurchasePage() {
 
           <div className="mb-6">
             <label className="mb-2 block text-xs font-bold text-slate-300">
-              填写手机号 <span className="font-normal text-orange-400">(必填 · 仅用于订单绑定与提卡凭证)</span>
+              填写邮箱 <span className="font-normal text-orange-400">(必填 · 仅用于订单绑定与提卡凭证)</span>
             </label>
             <div className="relative">
               <Smartphone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <input
-                type="tel"
+                type="email"
                 required
-                maxLength={11}
-                placeholder="请输入 11 位手机号码（查单与找回卡密凭据）"
-                value={phone}
-                onChange={(event) => setPhone(event.target.value.replace(/\D/g, ""))}
+                placeholder="请输入邮箱地址（查单与找回卡密凭据）"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="w-full rounded-xl border border-slate-700 bg-slate-800/50 py-3.5 pl-10 pr-4 font-mono text-sm font-medium text-white outline-none transition-all placeholder:text-slate-500 focus:border-indigo-500 focus:bg-slate-800 focus:ring-4 focus:ring-indigo-500/20"
               />
             </div>
-            <div className="mt-1.5 text-[11px] text-slate-500">* 无需接收验证码。付款成功后系统会自动将充值卡密与该手机号绑定。</div>
+            <div className="mt-1.5 text-[11px] text-slate-500">* 无需接收验证码。付款成功后系统会自动将充值卡密与该邮箱绑定。</div>
           </div>
 
           <div className="mb-8">
@@ -360,6 +359,20 @@ export default function PurchasePage() {
                 onClick={() => setPayType("wxpay")}
               />
             </div>
+          </div>
+
+          <div className="mb-6">
+            <a
+              href="https://work.weixin.qq.com/ca/cawcde60678a3fe1d6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-400 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/50"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+              </svg>
+              联系下单客服
+            </a>
           </div>
 
           <div className="mb-6 space-y-2 rounded-2xl border border-slate-700/50 bg-slate-800/50 p-4 text-xs text-slate-400">

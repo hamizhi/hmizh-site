@@ -583,6 +583,9 @@ export default function Home() {
             <p className="text-slate-400 text-lg">
               所有套餐均享 100% 充值失败退款保障
             </p>
+            <p className="text-amber-400 text-base font-bold mt-3 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2 inline-block">
+              ⚠️ 由于官方原因 20倍已改为10倍并上线25倍
+            </p>
           </div>
 
           <div className="grid items-stretch gap-6 md:grid-cols-3">
@@ -640,7 +643,7 @@ export default function Home() {
 
                       {/* 官网价格提示 */}
                       {currentTier && (
-                        <div className="absolute top-11 left-0 text-[10px] text-slate-500 whitespace-nowrap">
+                        <div className="absolute top-11 left-0 text-xs text-white whitespace-nowrap">
                           官网 {currentTier.officialPrice}
                         </div>
                       )}
@@ -860,7 +863,7 @@ export default function Home() {
                       <div className="text-xs text-slate-400 mb-1.5 font-semibold">
                         充值卡密
                       </div>
-                      <div className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 font-mono text-sm text-gray-800">
+                      <div className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 font-mono text-sm text-white">
                         <span className="font-bold tracking-wider">
                           CR-9F2A-••••-7K2Q
                         </span>
@@ -903,7 +906,7 @@ export default function Home() {
                         <div className="text-xs text-slate-400 mb-1 font-medium">
                           卡密已自动载入
                         </div>
-                        <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 font-mono text-xs text-slate-400 font-bold">
+                        <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 font-mono text-sm text-white font-bold">
                           CR-9F2A-••••-7K2Q
                         </div>
                       </div>
@@ -939,7 +942,7 @@ export default function Home() {
                         ChatGPT Plus 会员已生效
                       </div>
                       <div className="text-xs text-slate-500 mt-0.5">
-                        GPT-4o、o1 推理模型全量解锁
+                        pro 推理模型全量解锁
                       </div>
                     </div>
 
@@ -1064,7 +1067,7 @@ export default function Home() {
 
           <button
             onClick={() => alert("查看真实微信反馈截图")}
-            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full shadow-md shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
+            className="hidden inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full shadow-md shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
           >
             <MessageCircle className="w-3.5 h-3.5" />
             查看真实微信反馈

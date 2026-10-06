@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 
 export type OrderRow = {
   order_id: string;
-  phone: string;
+  email: string;
   plan_id: string;
   plan_name: string | null;
   money: number;
@@ -35,7 +35,7 @@ export type AdminStats = {
 };
 
 export type CreateOrderInput = {
-  phone: string;
+  email: string;
   planId: "go" | "plus" | "pro-5x" | "pro" | "account";
   planName: string;
   money: number;
@@ -103,7 +103,7 @@ export async function getAdminData(): Promise<{
     supabase
       .from("orders")
       .select(
-        "order_id, phone, plan_id, plan_name, money, status, card_code, created_at, paid_at",
+        "order_id, email, plan_id, plan_name, money, status, card_code, created_at, paid_at",
       )
       .order("created_at", { ascending: false })
       .limit(100),
@@ -197,7 +197,7 @@ export async function createPendingOrder(input: CreateOrderInput): Promise<strin
   const orderId = `GETGPT${Date.now()}${randomUUID().replaceAll("-", "").slice(0, 8).toUpperCase()}`;
   const { error } = await supabase.from("orders").insert({
     order_id: orderId,
-    phone: input.phone,
+    email: input.email,
     plan_id: input.planId,
     plan_name: input.planName,
     money: input.money,
@@ -213,7 +213,7 @@ export async function getOrderForPayment(orderId: string) {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "order_id, phone, plan_id, plan_name, money, status, card_code, created_at, paid_at",
+      "order_id, email, plan_id, plan_name, money, status, card_code, created_at, paid_at",
     )
     .eq("order_id", orderId)
     .maybeSingle();

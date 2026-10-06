@@ -10,7 +10,7 @@ type Draft = {
   planId?: string;
   planTitle?: string;
   price?: number;
-  phone?: string;
+  email?: string;
   payType?: "alipay" | "wxpay";
 };
 
@@ -95,11 +95,11 @@ export default function PayPage() {
   }, []);
 
   useEffect(() => {
-    if (!draft?.orderId || !draft.phone || paid) return;
+    if (!draft?.orderId || !draft.email || paid) return;
     const timer = window.setInterval(async () => {
       try {
         const response = await fetch(
-          `/api/orders/${encodeURIComponent(draft.orderId!)}/?phone=${encodeURIComponent(draft.phone!)}`,
+          `/api/orders/${encodeURIComponent(draft.orderId!)}/?email=${encodeURIComponent(draft.email!)}`,
           { cache: "no-store" },
         );
         const data = await response.json();
@@ -172,7 +172,7 @@ export default function PayPage() {
           <div className="mb-6 space-y-2 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 text-left text-xs text-gray-600">
             <Row label="商品名称" value={draft?.planTitle ?? plan.title} />
             <Row label="应付金额" value={`¥${price}.00`} emphasis />
-            <Row label="关联手机号" value={draft?.phone || "未填写"} />
+            <Row label="关联邮箱" value={draft?.email || "未填写"} />
             <Row label="商户订单号" value={orderNo || "生成中..."} />
           </div>
 

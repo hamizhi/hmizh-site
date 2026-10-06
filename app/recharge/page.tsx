@@ -25,13 +25,13 @@ export default function RechargePage() {
     const params = new URLSearchParams(window.location.search);
     const currentOrderId = params.get("order_id");
     const raw = sessionStorage.getItem("current_order_draft");
-    const draft = raw ? (JSON.parse(raw) as { phone?: string }) : null;
-    if (!currentOrderId || !draft?.phone) {
+    const draft = raw ? (JSON.parse(raw) as { email?: string }) : null;
+    if (!currentOrderId || !draft?.email) {
       setError("缺少订单信息，请从支付页面进入。");
       return;
     }
 
-    fetch(`/api/orders/${encodeURIComponent(currentOrderId)}?phone=${encodeURIComponent(draft.phone)}`, { cache: "no-store" })
+    fetch(`/api/orders/${encodeURIComponent(currentOrderId)}?email=${encodeURIComponent(draft.email)}`, { cache: "no-store" })
       .then(async (response) => {
         const data = await response.json();
         if (!response.ok || !data.success || data.order.status !== "paid" || !data.order.cardCode) {
@@ -95,13 +95,13 @@ export default function RechargePage() {
             <p className="mt-1 text-xs text-gray-500">请保存卡密，并按官方页面完成激活</p>
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl border border-gray-200/80 bg-gray-50/90 p-4 font-mono text-sm">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-700/50 bg-slate-900 p-4 font-mono text-sm">
             <div>
-              <div className="font-sans text-[11px] text-gray-400">您的专属充值卡密</div>
-              <div className="mt-0.5 text-base font-extrabold tracking-wider text-gray-900">{card}</div>
+              <div className="font-sans text-[11px] text-slate-400">您的专属充值卡密</div>
+              <div className="mt-0.5 text-lg font-extrabold tracking-wider text-white">{card}</div>
             </div>
-            <button type="button" onClick={copyCard} className="flex items-center gap-1 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 font-sans text-xs font-semibold text-gray-700 hover:bg-gray-50">
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Clipboard className="h-3.5 w-3.5" />}
+            <button type="button" onClick={copyCard} className="flex items-center gap-1 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-3.5 py-1.5 font-sans text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20">
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Clipboard className="h-3.5 w-3.5" />}
               {copied ? "已复制" : "复制卡密"}
             </button>
           </div>
