@@ -274,32 +274,61 @@ export default function RedeemPage() {
           {["codeVerified", "preflighting", "awaitingConfirmation"].includes(state) && (
             <>
               <div className="my-7 border-t border-slate-100" />
+
+              {/* 步骤1：点击下方按钮获取充值信息 */}
               <div className="mb-6 flex items-center gap-3 text-sm font-bold">
+                <StepBadge number="1" active done />
+                <span>点击下方按钮获取充值信息</span>
+              </div>
+              <a
+                href="https://chatgpt.com/api/auth/session"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 py-3.5 text-sm font-bold text-white transition hover:from-indigo-600 hover:to-purple-700"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                点我去获取充值信息
+              </a>
+
+              <div className="my-6 border-t border-slate-100" />
+
+              {/* 步骤2：确保已登录ChatGPT账户 */}
+              <div className="mb-4 flex items-center gap-3 text-sm font-bold">
                 <StepBadge number="2" active done={["awaitingConfirmation"].includes(state)} />
                 <span>确保已登录ChatGPT账户</span>
               </div>
 
               {/* 登录状态检查提示 */}
-              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <div className="flex items-start gap-2 mb-2">
+              <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                <div className="flex items-start gap-2">
                   <svg className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1">
                     <div className="text-sm font-bold text-amber-900 mb-1">登录状态检查：</div>
                     <div className="text-xs text-amber-800 leading-relaxed">
-                      如果页面显示 🔓 说明未登录<br />
+                      如果页面显示短短的两三行说明未登录<br />
                       需要先去 <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-900">chatgpt.com</a> 登录
                     </div>
                   </div>
                 </div>
               </div>
 
+              <div className="my-6 border-t border-slate-100" />
+
+              {/* 步骤3：复制页面中的全部内容到下方文本框 */}
+              <div className="mb-4 flex items-center gap-3 text-sm font-bold">
+                <StepBadge number="3" active />
+                <span>复制页面中的全部内容到下方文本框</span>
+              </div>
+
               <form onSubmit={verifySession}>
                 <label className="block text-sm font-bold text-slate-800">
-                  ChatGPT Session
-                  <input
-                    type="password"
+                  请填入 ChatGPT 充值信息
+                  <div className="mt-1 text-xs font-normal text-slate-500">获取方法请参考上方步骤</div>
+                  <textarea
                     value={session}
                     onChange={(event) => {
                       setSession(event.target.value);
@@ -311,14 +340,18 @@ export default function RedeemPage() {
                         setConfirmedEmail(false);
                       }
                     }}
-                    placeholder="请输入当前账号的 Session"
+                    placeholder='{"user":{"id":"user-xxx"},"accessToken":"eyJhbGciOiJSUzI1NiIs..."}'
+                    rows={6}
                     autoComplete="off"
                     spellCheck={false}
                     required
                     disabled={busy}
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-sm outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50 disabled:opacity-60"
+                    className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-50 disabled:opacity-60"
                   />
                 </label>
+                <div className="mt-2 text-xs text-slate-500">
+                  请粘贴从 ChatGPT 官网获取的完整 JSON 数据
+                </div>
                 <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
                   <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
                   Session 只用于验证账号和兑换，不保存到数据库，也不会放入 URL。
@@ -339,7 +372,7 @@ export default function RedeemPage() {
             <>
               <div className="my-7 border-t border-slate-100" />
               <div className="mb-4 flex items-center gap-3 text-sm font-bold">
-                <StepBadge number="3" active />
+                <StepBadge number="4" active />
                 <span>确认账号邮箱</span>
               </div>
               <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4">
