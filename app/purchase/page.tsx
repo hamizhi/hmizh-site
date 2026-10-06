@@ -110,27 +110,27 @@ export default function PurchasePage() {
 
   // 如果是 Pro 套餐，获取当前选中档位的价格
   const getCurrentPrice = () => {
-    if (selectedPlanId === "pro" && plan.tiers) {
+    if (selectedPlanId === "pro" && "tiers" in plan) {
       const currentTier = plan.tiers.find(t => t.id === proTier);
       return currentTier ? currentTier.price : plan.tiers[0].price;
     }
-    return plan.price;
+    return "price" in plan ? plan.price : 720;
   };
 
   const getCurrentOriginalPrice = () => {
-    if (selectedPlanId === "pro" && plan.tiers) {
+    if (selectedPlanId === "pro" && "tiers" in plan) {
       const currentTier = plan.tiers.find(t => t.id === proTier);
       return currentTier ? currentTier.originalPrice : plan.tiers[0].originalPrice;
     }
-    return plan.originalPrice;
+    return "originalPrice" in plan ? plan.originalPrice : 720;
   };
 
   const getCurrentDiscount = () => {
-    if (selectedPlanId === "pro" && plan.tiers) {
+    if (selectedPlanId === "pro" && "tiers" in plan) {
       const currentTier = plan.tiers.find(t => t.id === proTier);
       return currentTier ? currentTier.discount : plan.tiers[0].discount;
     }
-    return plan.discount;
+    return "discount" in plan ? plan.discount : 0;
   };
 
   const finalPrice = getCurrentPrice();
