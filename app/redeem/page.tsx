@@ -321,7 +321,7 @@ export default function RedeemPage() {
               {/* 步骤3：复制页面中的全部内容到下方文本框 */}
               <div className="mb-4 flex items-center gap-3 text-sm font-bold">
                 <StepBadge number="3" active />
-                <span>复制页面中的全部内容到下方文本框</span>
+                <span>复制页面中的全部内容到下方文本框（开启翻译的需要把翻译关掉再粘贴）</span>
               </div>
 
               <form onSubmit={verifySession}>
