@@ -123,27 +123,17 @@ export default function RechargePage() {
               )}
             </div>
 
-            <div className="border-b border-gray-100 py-6">
+            <div className="py-6">
               <div className="mb-2 flex items-center gap-2">
                 <span className="rounded bg-indigo-50 px-2 py-0.5 text-xs font-bold text-indigo-600">步骤 2</span>
-                <span className="text-sm font-bold text-gray-900">前往 ChatGPT 官方页面</span>
+                <span className="text-sm font-bold text-gray-900">前往自主兑换站</span>
               </div>
               <p className="mb-4 text-xs leading-relaxed text-gray-500">
-                请在官方页面自行登录并完成订阅激活。本站不会要求你粘贴 Session、Token 或账号密码。
+                请前往兑换站输入卡密完成激活。
               </p>
-              <a href="https://chatgpt.com/" target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 py-3.5 text-xs font-bold text-indigo-700 transition-all hover:bg-indigo-100">
-                打开 ChatGPT 官方页面 <ExternalLink className="h-4 w-4" />
+              <a href="https://hmizh.com/redeem" target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 py-3.5 text-xs font-bold text-indigo-700 transition-all hover:bg-indigo-100">
+                前往自主兑换站 <ExternalLink className="h-4 w-4" />
               </a>
-            </div>
-
-            <div className="pt-6">
-              <label className="flex cursor-pointer items-start gap-2 text-xs text-gray-600">
-                <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-0.5 h-4 w-4 accent-indigo-600" />
-                <span>我已在官方页面完成激活，并确认没有向任何人提供账号密码或登录 Token。</span>
-              </label>
-              <button type="button" disabled={!confirmed || cardStatus !== "valid"} onClick={() => setFinished(true)} className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-4 text-base font-extrabold text-white shadow-lg shadow-indigo-500/25 transition-all hover:bg-indigo-700 disabled:opacity-50">
-                <span>{cardStatus !== "valid" ? "正在核验卡密..." : "完成激活确认"}</span><span>&gt;</span>
-              </button>
             </div>
           </section>
         ) : (
