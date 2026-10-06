@@ -53,6 +53,14 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
   const [searchKey, setSearchKey] = useState("");
+
+  // CDK 发码相关状态
+  const [issuePlan, setIssuePlan] = useState("plus");
+  const [issueCount, setIssueCount] = useState(1);
+  const [issueCountry, setIssueCountry] = useState("US");
+  const [issueCurrency, setIssueCurrency] = useState("USD");
+  const [issuing, setIssuing] = useState(false);
+  const [issuedCdks, setIssuedCdks] = useState<string[]>([]);
   const [importPlan, setImportPlan] = useState("plus");
   const [importText, setImportText] = useState("");
   const [importing, setImporting] = useState(false);
@@ -135,6 +143,51 @@ export default function AdminPage() {
       }),
     });
     await loadData();
+  };
+
+  // 处理 CDK 发码
+  const handleIssueCdk = async () => {
+    if (issueCount < 1 || issueCount > 100) {
+      alert("发放数量必须在 1-100 之间");
+      return;
+    }
+
+    if (!confirm(`确认发放 ${issueCount} 张 ${issuePlan} CDK？\n地区: ${issueCountry}/${issueCurrency}`)) {
+      return;
+    }
+
+    setIssuing(true);
+    setIssuedCdks([]);
+
+    try {
+      const response = await fetch("/api/admin/issue-cdk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: issuePlan,
+          count: issueCount,
+          paymentCountry: issueCountry,
+          paymentCurrency: issueCurrency,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        alert(`发码失败: ${data.error || "未知错误"}`);
+        return;
+      }
+
+      setIssuedCdks(data.cdks || []);
+      alert(`成功发放 ${data.cdks?.length || 0} 张 CDK！`);
+
+      // 刷新数据
+      await loadData();
+    } catch (error) {
+      alert(`网络错误: ${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setIssuing(false);
+    }
   };
 
   if (!isAuthed) {
@@ -417,6 +470,120 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+        </section>
+
+        {/* CDK 在线发放 */}
+        <section className="space-y-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-2 font-bold text-gray-900">
+            <PackageCheck className="h-5 w-5 text-indigo-600" />
+            <span>在线发放 CDK</span>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-xs font-bold text-gray-700">
+                套餐类型
+              </label>
+              <select
+                value={issuePlan}
+                onChange={(e) => setIssuePlan(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="go">ChatGPT Go</option>
+                <option value="plus">ChatGPT Plus</option>
+                <option value="pro_5x">Pro 5x</option>
+                <option value="pro_10x">Pro 10x</option>
+                <option value="pro_25x">Pro 25x</option>
+                <option value="pro_50x">Pro 50x</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-bold text-gray-700">
+                发放数量
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={issueCount}
+                onChange={(e) => setIssueCount(Number(e.target.value))}
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-bold text-gray-700">
+                付款地区
+              </label>
+              <select
+                value={issueCountry}
+                onChange={(e) => {
+                  setIssueCountry(e.target.value);
+                  // 自动设置对应货币
+                  const currencyMap: Record<string, string> = {
+                    US: "USD",
+                    JP: "JPY",
+                    PH: "PHP",
+                    CL: "CLP",
+                    EG: "EGP",
+                    NG: "NGN",
+                    TR: "TRY",
+                  };
+                  setIssueCurrency(currencyMap[e.target.value] || "USD");
+                }}
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none"
+              >
+                <option value="US">美国 (US)</option>
+                <option value="JP">日本 (JP)</option>
+                <option value="PH">菲律宾 (PH)</option>
+                <option value="CL">智利 (CL)</option>
+                <option value="EG">埃及 (EG)</option>
+                <option value="NG">尼日利亚 (NG)</option>
+                <option value="TR">土耳其 (TR)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-bold text-gray-700">
+                付款货币
+              </label>
+              <input
+                type="text"
+                value={issueCurrency}
+                readOnly
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleIssueCdk}
+            disabled={issuing}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+          >
+            <PlusCircle className="h-4 w-4" />
+            {issuing ? "发放中..." : "立即发放"}
+          </button>
+
+          {issuedCdks.length > 0 && (
+            <div className="rounded-xl bg-emerald-50 p-4">
+              <div className="mb-2 text-xs font-bold text-emerald-900">
+                已发放 {issuedCdks.length} 张 CDK：
+              </div>
+              <div className="max-h-60 space-y-1 overflow-y-auto">
+                {issuedCdks.map((cdk, index) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-white p-2 font-mono text-xs text-gray-800"
+                  >
+                    {cdk}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </div>
