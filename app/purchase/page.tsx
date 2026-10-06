@@ -19,7 +19,7 @@ const PLANS = {
     desc: "使用更多核心智能额度，写作、了解、创建和聊天都更多。",
     originalPrice: 49,
     discount: 0,
-    price: 1,
+    price: 50,
     badge: "新用户首选",
     features: [
       "更多使用工具的消息额度",
