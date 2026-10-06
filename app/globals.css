@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "GetGPT Sans";
+  src: url("/legacy-assets/_next/static/media/e4af272ccee01ff0-s.p.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --ink: #191c29;
+  --muted: #64748b;
+  --brand: #4f46e5;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body { margin: 0; background: #090a0f; color: #f4f4f5; font-family: "GetGPT Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+body > div { min-height: 100dvh; }
+a { text-decoration: none; }
+button, a { -webkit-tap-highlight-color: transparent; }
+.soft-grid { background-image: linear-gradient(#eef2ff 1px, transparent 1px), linear-gradient(90deg, #eef2ff 1px, transparent 1px); background-size: 48px 48px; }
+.nav-link { display: inline-flex; align-items: center; gap: .375rem; white-space: nowrap; border-radius: .5rem; padding: .625rem .75rem; font-size: .875rem; font-weight: 500; color: #475569; transition: color .2s, background-color .2s; }
+.nav-link:hover { color: #0f172a; background: #f8fafc; }
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 28s linear infinite;
+}
+
+.animate-marquee:hover,
+.animate-marquee-reverse:hover {
+  animation-play-state: paused;
+}
+
+/* 价格切换动画 */
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

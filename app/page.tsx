@@ -1,0 +1,1363 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useLenis } from "./components/lenis-provider";
+import {
+  ShieldCheck,
+  Zap,
+  CreditCard,
+  CheckCircle2,
+  ChevronDown,
+  Copy,
+  Check,
+  Star,
+  MessageCircle,
+  Clock,
+  ChevronRight,
+  ExternalLink,
+  Menu,
+  Play,
+  TrendingUp,
+  Users,
+  Timer,
+  Sparkles,
+  AlertCircle,
+  Gift,
+  Flame,
+} from "lucide-react";
+
+// 1. 标题下 6 个卖点轮换词
+const ROTATING_WORDS = [
+  "2分钟极速完成充值",
+  "官方正规充值通道",
+  "无需海外信用卡",
+  "充值不成功100%退款",
+  "已服务 8.9万+ 用户",
+  "24小时在线客服",
+];
+
+// 2. 实时购买通知数据
+const LIVE_PURCHASES = [
+  { name: "张**", location: "北京", plan: "ChatGPT Plus", time: "刚刚" },
+  { name: "李**", location: "上海", plan: "ChatGPT Pro", time: "1分钟前" },
+  { name: "王**", location: "深圳", plan: "ChatGPT Plus", time: "2分钟前" },
+  { name: "陈**", location: "广州", plan: "ChatGPT Plus", time: "3分钟前" },
+  { name: "刘**", location: "杭州", plan: "ChatGPT Pro", time: "5分钟前" },
+];
+
+// 3. 状态通知（保留原有的）
+const SOCIAL_NOTICES = [
+  "支持 ChatGPT, Claude, Cursor, Gemini 等主流工具",
+  "正规渠道充值，不成功 100% 退款",
+  "刚刚，一位用户成功充值了 ChatGPT Plus",
+  "目前有 12 位用户正在充值",
+];
+
+// 原站评价数据（上下双排轮播）
+const REVIEWS_ROW_1 = [
+  {
+    name: "MuxiChen",
+    avatar: "M",
+    title: "上海 AI 创业公司产品总监",
+    tag: "长期续费用户",
+    date: "2026-05",
+    text: "支付宝折腾礼品卡半天没成功，换成这里的代充之后 2 分钟就充好了，用了几个月了很稳！",
+  },
+  {
+    name: "温小鹿",
+    avatar: "温",
+    title: "AI 学习者 · 论文写作",
+    tag: "客服好评",
+    date: "2026-03",
+    text: "信用卡尝试了几十次都被拒，最后靠这里的代充一次成功。客服一步步跟进，终于不用再跟苹果拉扯。",
+  },
+  {
+    name: "Ming Jia",
+    avatar: "M",
+    title: "数据分析师",
+    tag: "ChatGPT Pro 用户",
+    date: "2026-04",
+    text: "GPT 充值服务稳定用了 4 个月，ChatGPT Plus 稳稳续费，各种 AI 吹得天花乱坠，最终还是觉得 GPT 好使！",
+  },
+  {
+    name: "Kris Luo",
+    avatar: "K",
+    title: "独立开发者",
+    tag: "技术用户",
+    date: "2026-06",
+    text: "半夜写代码想测试 Codex 新模型，直接手机下单充值。客服一点半还在线帮忙解决，贴心。",
+  },
+];
+
+const REVIEWS_ROW_2 = [
+  {
+    name: "阿哲",
+    avatar: "阿",
+    title: "互联网产品经理",
+    tag: "失败秒退",
+    date: "2026-02",
+    text: "第一次没充上，本来都做好扯皮准备了，结果直接秒退款，第二次重新下单 1 分钟到账，售后完全不用操心。",
+  },
+  {
+    name: "Leon Wu",
+    avatar: "L",
+    title: "后端架构师",
+    tag: "一年老用户",
+    date: "2026-05",
+    text: "从虚拟卡跑路那会儿用到现在一年多了，每次 GPT 代充都是下单即充，中间一次没出过错，已推荐给全组。",
+  },
+  {
+    name: "LaoPeng",
+    avatar: "L",
+    title: "海外留学生",
+    tag: "礼品卡充值",
+    date: "2026-03",
+    text: "美区卡被封后只能靠朋友帮忙太麻烦。这里可以直接提供礼品卡充值，附赠流程图片，新手也能一次成功。",
+  },
+  {
+    name: "Rimika",
+    avatar: "R",
+    title: "AI 内容创作者",
+    tag: "多账号充",
+    date: "2026-06",
+    text: "搞内容创业要维护多个 Plus 账号，之前经常忘记续费。现在直接交给这里，自动充值省心多了。",
+  },
+];
+
+// 套餐定价数据 - 增强版
+const PLANS = [
+  {
+    id: "go",
+    name: "ChatGPT Go",
+    tag: "新手入门",
+    badge: "性价比之选",
+    price: "1",
+    period: "/ 月",
+    originalPrice: "49",
+    dailyPrice: "新用户首选",
+    discount: null,
+    stock: "充足",
+    description: "使用更多核心智能额度，写作、了解、创建和聊天都更多。",
+    features: [
+      "更多使用工具的消息额度",
+      "更多图像创建额度",
+      "更多记忆和存储空间",
+      "更多语音聊天额度",
+    ],
+    popular: false,
+    glow: "emerald",
+  },
+  {
+    id: "plus",
+    name: "ChatGPT Plus",
+    tag: "🔥 爆款热销",
+    badge: "立减 ¥50",
+    price: "149",
+    period: "/ 月",
+    originalPrice: "199",
+    dailyPrice: "限时优惠价 ¥149",
+    discount: "50",
+    stock: "仅剩 23 份",
+    description: "解锁高级智能，越用越懂你的偏好",
+    features: [
+      "面向复杂工作的高级智能",
+      "更高质量的图像生成",
+      "工作智能体可跨应用和文件执行操作",
+      "用 Codex 自动化编码",
+      "个人理财和数据分析工具",
+      "支持开具正规采购凭证/收据用于财务报销",
+    ],
+    popular: true,
+    glow: "indigo",
+  },
+  {
+    id: "pro",
+    name: "ChatGPT Pro",
+    tag: "企业首选",
+    badge: "旗舰算力",
+    // 支持三个档位
+    tiers: [
+      { id: "5x", label: "5x", price: "720", originalPrice: "720", officialPrice: "$100" },
+      { id: "10x", label: "10x", price: "1350", originalPrice: "1350", officialPrice: "$200" },
+      { id: "25x", label: "25x", price: "3500", originalPrice: "3500", officialPrice: "$500" },
+    ],
+    defaultTier: "5x",
+    price: "720",
+    period: "起 / 月",
+    originalPrice: "720",
+    dailyPrice: "提供 3 档使用额度",
+    discount: null,
+    stock: "充足",
+    description: "面向整个工作日都依赖最强智能的用户",
+    features: [
+      "最强大的前沿 Pro 模型",
+      "Dots 全天候在线智能体",
+      "更多工作模式和 Codex 使用额度",
+      "抢先体验新工具和模型",
+      "提供 3 档使用额度（5x/10x/25x）",
+      "支持开具正规采购凭证/收据用于财务报销",
+    ],
+    popular: false,
+    glow: "purple",
+    hasTiers: true, // 标记这个套餐有档位选择
+  },
+];
+
+// FAQ
+const FAQ_CATEGORIES = [
+  "售前咨询",
+  "充值流程",
+  "账号使用",
+  "售后支持",
+  "Codex",
+];
+
+const FAQS = [
+  {
+    category: "售前咨询",
+    q: "ChatGPT 代充会封号吗？安全吗？",
+    a: "我们使用苹果官方正规礼品卡渠道完成充值，全程无需提供账号密码，不触碰你的私人对话与数据。官方合规账单，绝非低价黑卡或来路不明的虚拟卡，100% 账号安全零风险。",
+  },
+  {
+    category: "售前咨询",
+    q: "支持哪些支付方式？需要开通海外信用卡吗？",
+    a: "完全不需要海外卡！直接支持国内最常用的微信支付与支付宝扫码。付款后系统秒级自动生成充值卡密，省去高达几十美元的境外虚拟卡开卡费与汇率损耗。",
+  },
+  {
+    category: "充值流程",
+    q: "购买后的整体充值流程是怎样的？",
+    a: "极简三步：1. 选择套餐，微信或支付宝付款；2. 获得专属充值卡密与官方激活教程链接；3. 按照 1 分钟新手教程直接激活，权益即刻生效。",
+  },
+  {
+    category: "充值流程",
+    q: "代充支持哪些类型的账号？",
+    a: "只要能正常登录 chatgpt.com 的任何账号（包括 Google 登录、微软登录、苹果登录、QQ/163 邮箱注册的账号）均完美支持。",
+  },
+  {
+    category: "账号使用",
+    q: "到期后会自动扣费吗？次月怎么续费？",
+    a: "绝不会自动扣款！我们是一次性买断制订阅，不绑定任何扣款协议。次月如果需要继续使用，在会员到期日前重新在平台下单即可稳定续费。",
+  },
+  {
+    category: "售后支持",
+    q: "如果充值不成功怎么处理？退款方便吗？",
+    a: "我们提供 100% 售后退款保障。如因卡密无效或账号环境问题未成功开通，请联系在线客服，我们承诺立即为你原路退还全额款项，绝不拖延。",
+  },
+];
+
+export default function Home() {
+  const lenis = useLenis();
+  const [copied, setCopied] = useState(false);
+  const [wordIdx, setWordIdx] = useState(0);
+  const [wordFade, setWordFade] = useState(true);
+  const [noticeIdx, setNoticeIdx] = useState(0);
+  const [noticeFade, setNoticeFade] = useState(true);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3>(1);
+  const [activeFaq, setActiveFaq] = useState<number | null>(0);
+  const [selectedCategory, setSelectedCategory] = useState("售前咨询");
+  const [purchaseIdx, setPurchaseIdx] = useState(0);
+  const [showPurchase, setShowPurchase] = useState(false);
+  const [countdown, setCountdown] = useState({ hours: 2, minutes: 34, seconds: 18 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [proTier, setProTier] = useState("5x"); // Pro 套餐档位选择
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText("CR-9F2A-88KL-7K2Q");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // 鼠标跟随效果
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // 轮播卖点词
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setWordFade(false);
+      setTimeout(() => {
+        setWordIdx((prev) => (prev + 1) % ROTATING_WORDS.length);
+        setWordFade(true);
+      }, 250);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNoticeFade(false);
+      setTimeout(() => {
+        setNoticeIdx((prev) => (prev + 1) % SOCIAL_NOTICES.length);
+        setNoticeFade(true);
+      }, 250);
+    }, 3200);
+    return () => clearInterval(timer);
+  }, []);
+
+  // 实时购买通知
+  useEffect(() => {
+    const showTimer = setInterval(() => {
+      setPurchaseIdx((prev) => (prev + 1) % LIVE_PURCHASES.length);
+      setShowPurchase(true);
+      setTimeout(() => setShowPurchase(false), 5000);
+    }, 8000);
+    return () => clearInterval(showTimer);
+  }, []);
+
+  // 倒计时
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        let { hours, minutes, seconds } = prev;
+        seconds--;
+        if (seconds < 0) {
+          seconds = 59;
+          minutes--;
+        }
+        if (minutes < 0) {
+          minutes = 59;
+          hours--;
+        }
+        if (hours < 0) {
+          hours = 23;
+        }
+        return { hours, minutes, seconds };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!window.location.hash) return;
+
+    const timer = window.setTimeout(() => {
+      const target = document.getElementById(
+        decodeURIComponent(window.location.hash.slice(1)),
+      );
+
+      if (!target) return;
+      if (lenis) {
+        lenis.scrollTo(target, { offset: -64 });
+      } else {
+        target.scrollIntoView({ behavior: "auto", block: "start" });
+      }
+    }, 100);
+
+    return () => window.clearTimeout(timer);
+  }, [lenis]);
+
+  const scrollToPricing = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (lenis) {
+      lenis.scrollTo("#pricing", { offset: -64, duration: 1.35 });
+      return;
+    }
+
+    document.getElementById("pricing")?.scrollIntoView({ behavior: "auto", block: "start" });
+  };
+
+  const filteredFaqs = FAQS.filter((f) => f.category === selectedCategory);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white antialiased relative overflow-hidden">
+      {/* 鼠标跟随光晕 */}
+      <div
+        className="pointer-events-none fixed inset-0 z-30 transition duration-300"
+        style={{
+          background: `radial-gradient(600px at ${mousePosition.x}px ${mousePosition.y}px, rgba(99, 102, 241, 0.15), transparent 80%)`,
+        }}
+      />
+
+      {/* 动态背景粒子 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-96 h-96 bg-indigo-500/100/20 rounded-full blur-3xl -top-48 -left-48 animate-pulse" />
+        <div className="absolute w-96 h-96 bg-purple-500/20 rounded-full blur-3xl top-1/2 -right-48 animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -bottom-48 left-1/3 animate-pulse" style={{ animationDelay: '0.5s' }} />
+      </div>
+
+      {/* 导航栏 */}
+      <header className="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-lg shadow-lg shadow-indigo-500/50">
+              G
+            </div>
+            <div>
+              <div className="font-bold text-lg tracking-tight text-white leading-tight">
+                GPT <span className="text-indigo-400">Pro</span>
+              </div>
+              <div className="text-[11px] text-slate-400 font-normal leading-tight">
+                ChatGPT 订阅服务
+              </div>
+            </div>
+          </div>
+
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+            <Link
+              href="/plus-price"
+              className="hover:text-indigo-600 transition-colors"
+            >
+              ChatGPT 充值
+            </Link>
+            <Link
+              href="/plus-price"
+              className="hover:text-indigo-400 transition-colors"
+            >
+              Pro 专区
+            </Link>
+            <a
+              href="#process"
+              className="hover:text-indigo-400 transition-colors"
+            >
+              充值教程
+            </a>
+            <a
+              href="#testimonials"
+              className="hover:text-indigo-400 transition-colors"
+            >
+              用户评价
+            </a>
+          </nav>
+
+          <button
+            onClick={() => alert("请联系右下角在线客服核对订单状态")}
+            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white font-medium transition-colors"
+          >
+            <Menu className="w-4 h-4" />
+            <span>查询订单</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Hero 首屏 - 超强冲击力 */}
+      <section className="pt-20 pb-16 text-center relative z-10">
+        <div className="max-w-6xl mx-auto px-6">
+          {/* 限时优惠倒计时 */}
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 px-6 py-2.5 rounded-full mb-6 backdrop-blur-sm animate-pulse">
+            <Timer className="w-4 h-4 text-orange-400" />
+            <span className="text-sm font-bold text-orange-300">
+              限时优惠剩余：
+              <span className="text-white mx-1">
+                {String(countdown.hours).padStart(2, "0")}:
+                {String(countdown.minutes).padStart(2, "0")}:
+                {String(countdown.seconds).padStart(2, "0")}
+              </span>
+            </span>
+            <Gift className="w-4 h-4 text-orange-400 animate-bounce" />
+          </div>
+
+          {/* 主标题 - 超大 + 渐变 */}
+          <h1 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-purple-300 mb-4"
+            style={{
+              fontSize: "clamp(48px, 7vw, 86px)",
+              lineHeight: "1.05",
+              letterSpacing: "-2px",
+            }}
+          >
+            <div>ChatGPT Plus/Pro</div>
+            <div className="mt-1">极速充值</div>
+          </h1>
+
+          {/* 轮播卖点词 - 发光效果 */}
+          <div className="h-14 flex items-center justify-center mb-6">
+            <span
+              className={`font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 transition-all duration-500 ${wordFade ? 'opacity-100' : 'opacity-0'}`}
+              style={{
+                fontSize: "clamp(26px, 3.5vw, 38px)",
+                letterSpacing: "-0.8px",
+                textShadow: "0 0 30px rgba(139, 92, 246, 0.5)",
+              }}
+            >
+              ⚡ {ROTATING_WORDS[wordIdx]}
+            </span>
+          </div>
+
+          {/* 描述 */}
+          <p className="max-w-2xl mx-auto mb-8 text-slate-300 text-lg leading-relaxed">
+            2 分钟内完成 ChatGPT 充值，让每个人都能轻松订阅
+            <span className="text-indigo-400 font-bold"> Plus/Pro</span>
+          </p>
+
+          {/* 主按钮 - 超强视觉 */}
+          <div className="flex flex-col items-center gap-4 mb-10">
+            <button
+              type="button"
+              onClick={scrollToPricing}
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl group-hover:blur-2xl transition-all opacity-75" />
+              <div className="relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-lg px-12 py-5 rounded-full shadow-2xl shadow-indigo-500/50 transition-all group-hover:scale-105 active:scale-95">
+                <Zap className="w-5 h-5" />
+                <span>立即充值</span>
+                <ChevronRight className="w-5 h-5" />
+              </div>
+            </button>
+
+            <Link
+              href="/plus-price"
+              className="flex items-center gap-2 text-sm text-slate-400"
+            >
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>充值失败 100% 退款 · 无需海外信用卡</span>
+            </Link>
+          </div>
+
+          {/* 信任指标 - 发光卡片 */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+              <div className="relative bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl hover:border-indigo-500/50 transition-all">
+                <Users className="w-8 h-8 text-indigo-400 mb-3 mx-auto" />
+                <div className="text-3xl font-black text-white mb-1">89,763+</div>
+                <div className="text-sm text-slate-400">位用户已充值</div>
+              </div>
+            </div>
+
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+              <div className="relative bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl hover:border-emerald-500/50 transition-all">
+                <Star className="w-8 h-8 text-amber-400 mb-3 mx-auto fill-amber-400" />
+                <div className="text-3xl font-black text-white mb-1">4.9/5.0</div>
+                <div className="text-sm text-slate-400">用户综合好评</div>
+              </div>
+            </div>
+
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all" />
+              <div className="relative bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl hover:border-orange-500/50 transition-all">
+                <Zap className="w-8 h-8 text-orange-400 mb-3 mx-auto" />
+                <div className="text-3xl font-black text-white mb-1">2 分钟</div>
+                <div className="text-sm text-slate-400">极速到账</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3 大保障 */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-5 py-3 rounded-full hover:border-indigo-500/50 transition-all group">
+              <div className="w-10 h-10 rounded-full bg-indigo-500/100/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-bold text-white">售后无忧</div>
+                <div className="text-xs text-slate-400">失败 100% 退款</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-5 py-3 rounded-full hover:border-emerald-500/50 transition-all group">
+              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-bold text-white">极速到账</div>
+                <div className="text-xs text-slate-400">2 分钟自动完成</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-5 py-3 rounded-full hover:border-purple-500/50 transition-all group">
+              <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-bold text-white">支付便捷</div>
+                <div className="text-xs text-slate-400">支付宝/微信</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 套餐价格 - 霓虹发光版 */}
+      <section id="pricing" className="scroll-mt-16 py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-5xl font-black text-white mb-4 tracking-tight">
+              选择适合你的 <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">AI 套餐</span>
+            </h2>
+            <p className="text-slate-400 text-lg">
+              所有套餐均享 100% 充值失败退款保障
+            </p>
+          </div>
+
+          <div className="grid items-stretch gap-6 md:grid-cols-3">
+            {PLANS.map((plan) => {
+              // 如果是 Pro 套餐，根据选中的档位动态更新价格
+              const currentTier = plan.hasTiers && plan.tiers
+                ? plan.tiers.find(t => t.id === proTier) || plan.tiers[0]
+                : null;
+              const displayPrice = currentTier ? currentTier.price : plan.price;
+              const displayOriginalPrice = currentTier ? currentTier.originalPrice : plan.originalPrice;
+
+              return (
+                <div
+                  key={plan.id}
+                  className={`relative flex flex-col justify-between rounded-3xl p-6 sm:p-7 cursor-pointer transition-all duration-300 hover:-translate-y-2 group ${
+                    plan.popular
+                      ? "bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 shadow-2xl shadow-indigo-500/30"
+                      : "bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 hover:border-slate-600"
+                  }`}
+                >
+                  {/* 灵动岛档位选择器 - 仅 Pro 显示 */}
+                  {plan.hasTiers && plan.tiers && (
+                    <div className="absolute -top-3 right-6 z-20">
+                      <div className="relative bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 rounded-full px-1 py-1 shadow-2xl shadow-black/40">
+                        {/* 滑动背景指示器 */}
+                        <div
+                          className="absolute top-1 h-7 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out shadow-lg shadow-indigo-500/50"
+                          style={{
+                            left: `${4 + plan.tiers.findIndex(t => t.id === proTier) * 44}px`,
+                            width: '40px'
+                          }}
+                        />
+
+                        {/* 档位按钮 */}
+                        <div className="relative flex gap-1">
+                          {plan.tiers.map((tier) => (
+                            <button
+                              key={tier.id}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setProTier(tier.id);
+                              }}
+                              className={`relative px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
+                                proTier === tier.id
+                                  ? 'text-white'
+                                  : 'text-slate-400 hover:text-slate-200'
+                              }`}
+                            >
+                              {tier.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 官网价格提示 */}
+                      {currentTier && (
+                        <div className="absolute top-11 left-0 text-[10px] text-slate-500 whitespace-nowrap">
+                          官网 {currentTier.officialPrice}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {plan.popular && !plan.hasTiers && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                      🔥 {plan.tag}
+                    </div>
+                  )}
+
+                  <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <h3 className="text-lg font-bold text-white tracking-[-0.3px]">
+                      {plan.name}
+                    </h3>
+                    {!plan.popular && (
+                      <span className="text-[11px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700/50 font-semibold">
+                        {plan.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="inline-block text-[11px] font-bold text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded mb-3">
+                    {plan.dailyPrice}
+                  </div>
+
+                  <p className="text-slate-400 text-xs sm:text-sm mb-3 leading-relaxed font-normal">
+                    {plan.description}
+                  </p>
+
+                  <div className="flex items-baseline gap-1 mb-5">
+                    <span className="text-sm font-medium text-slate-500">¥</span>
+                    <span
+                      key={displayPrice}
+                      className="text-4xl font-black text-white tracking-[-1px] transition-all duration-500"
+                    >
+                      {displayPrice}
+                    </span>
+                    <span className="text-xs text-slate-500 ml-1">
+                      {plan.period}
+                    </span>
+                    {displayOriginalPrice !== displayPrice && (
+                      <span className="ml-2 text-xs text-slate-500 line-through">
+                        ¥{displayOriginalPrice}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-2.5 pt-5 border-t border-slate-800/50 mb-6">
+                    {plan.features.map((feat, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-2.5 text-xs sm:text-[13px] text-slate-400 leading-normal"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                        <span>{feat}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Link
+                  href={`/purchase?plan=${plan.id}`}
+                  className={`flex w-full items-center justify-center rounded-xl py-3 text-center font-bold text-sm transition-all duration-200 ${
+                    plan.popular
+                      ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/25 active:scale-98"
+                      : "bg-slate-700 hover:bg-gray-200 text-white active:scale-98"
+                  }`}
+                >
+                  立即购买
+                </Link>
+              </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. 充值流程 */}
+      <section
+        id="process"
+        className="scroll-mt-16 py-20 relative z-10"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2.5 tracking-[-0.8px]">
+              ChatGPT 代充 & 充值流程
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              简单三步走，全程无需密码，系统自动化交付
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-12 gap-8 items-center">
+            {/* 左侧可交互三步卡片 */}
+            <div className="lg:col-span-6 space-y-3.5">
+              <div
+                onClick={() => setActiveStep(1)}
+                className={`relative flex gap-4 p-5 sm:p-6 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                  activeStep === 1
+                    ? "bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500 shadow-2xl shadow-indigo-500/20"
+                    : "bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 hover:border-slate-600"
+                }`}
+              >
+                {activeStep === 1 && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl blur-lg transition-all" />
+                )}
+                <div
+                  className={`relative flex-shrink-0 w-9 h-9 rounded-xl font-bold flex items-center justify-center text-sm transition-colors ${
+                    activeStep === 1
+                      ? "bg-indigo-500/100 text-white"
+                      : "bg-slate-700 text-slate-400"
+                  }`}
+                >
+                  1
+                </div>
+                <div className="relative">
+                  <h4 className="font-bold text-white text-base mb-1 tracking-[-0.3px]">
+                    购买充值卡密
+                  </h4>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                    下单并支付完成，系统自动生成专属充值卡密。
+                  </p>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setActiveStep(2)}
+                className={`flex gap-4 p-5 sm:p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
+                  activeStep === 2
+                    ? "bg-slate-900/50 backdrop-blur-xl border-2 border-indigo-600 shadow-lg shadow-indigo-500/10 ring-4 ring-indigo-500/20"
+                    : "bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 hover:border-slate-600"
+                }`}
+              >
+                <div
+                  className={`flex-shrink-0 w-9 h-9 rounded-xl font-bold flex items-center justify-center text-sm transition-colors ${
+                    activeStep === 2
+                      ? "bg-indigo-600 text-white"
+                      : "bg-slate-700 text-slate-400"
+                  }`}
+                >
+                  2
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-base mb-1 tracking-[-0.3px]">
+                    输入 GPT 账户信息
+                  </h4>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                    输入 GPT 账户信息或按指引激活，系统将自动升级会员。
+                  </p>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setActiveStep(3)}
+                className={`flex gap-4 p-5 sm:p-6 rounded-2xl cursor-pointer transition-all duration-300 ${
+                  activeStep === 3
+                    ? "bg-slate-900/50 backdrop-blur-xl border-2 border-indigo-600 shadow-lg shadow-indigo-500/10 ring-4 ring-indigo-500/20"
+                    : "bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 hover:border-slate-600"
+                }`}
+              >
+                <div
+                  className={`flex-shrink-0 w-9 h-9 rounded-xl font-bold flex items-center justify-center text-sm transition-colors ${
+                    activeStep === 3
+                      ? "bg-indigo-600 text-white"
+                      : "bg-slate-700 text-slate-400"
+                  }`}
+                >
+                  3
+                </div>
+                <div>
+                  <h4 className="font-bold text-white text-base mb-1 tracking-[-0.3px]">
+                    完成账户充值
+                  </h4>
+                  <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                    系统自动为您的 ChatGPT 账户充值，1
+                    分钟内即可完成充值并生效。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 右侧 macOS 拟真窗口 */}
+            <div className="lg:col-span-6">
+              <div className="bg-slate-900/50 backdrop-blur-xl rounded-3xl border border-slate-700/50 shadow-xl overflow-hidden p-6 sm:p-8 min-h-[380px] flex flex-col justify-between">
+                <div className="flex items-center justify-between pb-3.5 border-b border-slate-800/50 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                  </div>
+                  <div className="text-xs font-mono text-slate-500 bg-slate-800/50 px-3 py-1 rounded-full border border-slate-700/50 font-medium">
+                    {activeStep === 1 && "getgpt.pro/order"}
+                    {activeStep === 2 && "getgpt.pro/activate"}
+                    {activeStep === 3 && "chatgpt.com/settings"}
+                  </div>
+                  <div className="w-10" />
+                </div>
+
+                {activeStep === 1 && (
+                  <div className="animate-in fade-in duration-300">
+                    <div className="text-center my-3">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-2.5 shadow-xs">
+                        <CheckCircle2 className="w-7 h-7" />
+                      </div>
+                      <div className="font-bold text-white text-lg">
+                        支付完成，卡密已生成
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        复制卡密后即可进入充值验证
+                      </div>
+                    </div>
+
+                    <div className="my-5">
+                      <div className="text-xs text-slate-400 mb-1.5 font-semibold">
+                        充值卡密
+                      </div>
+                      <div className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 font-mono text-sm text-gray-800">
+                        <span className="font-bold tracking-wider">
+                          CR-9F2A-••••-7K2Q
+                        </span>
+                        <button
+                          onClick={handleCopy}
+                          className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-3 py-1 rounded-lg border border-emerald-200 flex items-center gap-1 font-sans transition-all active:scale-95"
+                        >
+                          {copied ? (
+                            <Check className="w-3 h-3" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                          {copied ? "已复制" : "复制"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveStep(2)}
+                      className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-emerald-500/20 active:scale-98"
+                    >
+                      前往激活 →
+                    </button>
+                  </div>
+                )}
+
+                {activeStep === 2 && (
+                  <div className="animate-in fade-in duration-300">
+                    <div className="text-center my-2">
+                      <span className="text-xs font-bold text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded">
+                        STEP 2
+                      </span>
+                      <div className="font-bold text-white text-lg mt-1">
+                        核验充值卡密
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 my-4">
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1 font-medium">
+                          卡密已自动载入
+                        </div>
+                        <div className="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 font-mono text-xs text-slate-400 font-bold">
+                          CR-9F2A-••••-7K2Q
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-slate-400 mb-1 font-medium">
+                          需升级的 ChatGPT 账户
+                        </div>
+                        <input
+                          type="text"
+                          readOnly
+                          value="user@example.com (官方免密直连)"
+                          className="w-full bg-slate-800/50 p-3 rounded-xl border border-slate-700/50 text-xs text-slate-300 outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveStep(3)}
+                      className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-emerald-500/20 active:scale-98"
+                    >
+                      验证卡密并开通
+                    </button>
+                  </div>
+                )}
+
+                {activeStep === 3 && (
+                  <div className="animate-in fade-in duration-300">
+                    <div className="text-center my-3">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center mx-auto mb-2.5 shadow-xs">
+                        <Zap className="w-7 h-7" />
+                      </div>
+                      <div className="font-bold text-white text-lg">
+                        ChatGPT Plus 会员已生效
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        GPT-4o、o1 推理模型全量解锁
+                      </div>
+                    </div>
+
+                    <div className="my-4 p-3.5 rounded-xl bg-slate-800/50 border border-slate-800/50 space-y-1.5 text-xs text-slate-400">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>订阅状态：Plus 会员已激活 (30天)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>我们最强大的前沿 Pro 模型</span>
+                      </div>
+                    </div>
+
+                    <a
+                      href="https://chatgpt.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-sm transition-all shadow-md shadow-indigo-500/20 active:scale-98 flex items-center justify-center gap-1.5"
+                    >
+                      前往 ChatGPT 体验 →
+                    </a>
+                  </div>
+                )}
+
+                <div className="text-center text-[11px] text-slate-500 pt-2.5 border-t border-gray-50">
+                  官方正规渠道 · 免账号密码 · 充值失败 100% 立即退款
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. 为什么选择我们 */}
+      <section
+        id="why-us"
+        className="scroll-mt-16 py-20 bg-slate-900/50 backdrop-blur-xl border-t border-slate-800/50"
+      >
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2.5 tracking-[-0.8px]">
+              为什么选择我们
+            </h2>
+            <p className="text-slate-400 text-sm sm:text-base">
+              上线一年多的专业 ChatGPT 代充平台，为数万用户提供稳定可靠的 Plus /
+              Pro 充值服务
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="p-6 sm:p-7 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50/80 shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 cursor-pointer">
+              <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center mb-4">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1.5 tracking-[-0.3px]">
+                充值失败全额退款
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                充值失败 100% 立即全额退款，售后零推脱，请放心使用我们的服务。
+              </p>
+            </div>
+
+            <div className="p-6 sm:p-7 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50/80 shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 cursor-pointer">
+              <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center mb-4">
+                <CreditCard className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1.5 tracking-[-0.3px]">
+                无需海外信用卡
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                没有海外信用卡也不用愁，支付宝与微信即可完成 ChatGPT Plus 代充。
+              </p>
+            </div>
+
+            <div className="p-6 sm:p-7 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50/80 shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 cursor-pointer">
+              <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center mb-4">
+                <Zap className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1.5 tracking-[-0.3px]">
+                安全可靠保障
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                正规官方代充渠道，全程无需提供账号密码，全方位保护您的隐私安全。
+              </p>
+            </div>
+
+            <div className="p-6 sm:p-7 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50/80 shadow-sm hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 cursor-pointer">
+              <div className="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center mb-4">
+                <Clock className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1.5 tracking-[-0.3px]">
+                极速到账
+              </h3>
+              <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                通常 1–5 分钟内完成充值到账，全自动发卡处理，无需漫长等待。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. 用户评价（全宽无限平滑走马灯） */}
+      <section
+        id="testimonials"
+        className="py-20 bg-slate-900/50 backdrop-blur-xl border-t border-slate-800/50 overflow-hidden"
+      >
+        <div className="max-w-7xl mx-auto px-6 text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-[-0.8px]">
+            已服务 <span className="text-indigo-600">8.9万+</span>{" "}
+            位用户稳定充值
+          </h2>
+
+          <div className="flex items-center justify-center gap-1 mb-6 text-sm">
+            <span className="font-bold text-white mr-2">
+              4.9 / 5 综合好评
+            </span>
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+            ))}
+          </div>
+
+          <button
+            onClick={() => alert("查看真实微信反馈截图")}
+            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs px-5 py-2.5 rounded-full shadow-md shadow-indigo-500/20 transition-all hover:scale-105 active:scale-95"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            查看真实微信反馈
+          </button>
+        </div>
+
+        {/* 动态走马灯 */}
+        <div className="space-y-4 relative w-full overflow-hidden">
+          <div className="flex gap-4 animate-marquee whitespace-nowrap">
+            {[...REVIEWS_ROW_1, ...REVIEWS_ROW_1].map((t, idx) => (
+              <div
+                key={idx}
+                className="w-[340px] p-5 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50/80 shadow-xs flex-shrink-0 text-left whitespace-normal"
+              >
+                <div className="text-gray-300 font-serif text-2xl leading-none mb-1.5">
+                  “
+                </div>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-4 font-normal line-clamp-3">
+                  {t.text}
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t border-slate-700/50/60">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-gray-200 text-slate-300 font-bold flex items-center justify-center text-xs">
+                      {t.avatar}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-white">
+                        {t.name}
+                      </div>
+                      <div className="text-[10px] text-slate-500">{t.title}</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] bg-slate-900/50 backdrop-blur-xl text-slate-400 px-2 py-0.5 rounded-md border border-slate-700/50 font-medium">
+                    {t.tag}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-4 animate-marquee-reverse whitespace-nowrap">
+            {[...REVIEWS_ROW_2, ...REVIEWS_ROW_2].map((t, idx) => (
+              <div
+                key={idx}
+                className="w-[340px] p-5 rounded-2xl bg-slate-900/50 backdrop-blur-xl border border-slate-700/50/80 shadow-xs flex-shrink-0 text-left whitespace-normal"
+              >
+                <div className="text-gray-300 font-serif text-2xl leading-none mb-1.5">
+                  “
+                </div>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-4 font-normal line-clamp-3">
+                  {t.text}
+                </p>
+                <div className="flex items-center justify-between pt-3 border-t border-slate-700/50/60">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-gray-200 text-slate-300 font-bold flex items-center justify-center text-xs">
+                      {t.avatar}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-white">
+                        {t.name}
+                      </div>
+                      <div className="text-[10px] text-slate-500">{t.title}</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] bg-slate-900/50 backdrop-blur-xl text-slate-400 px-2 py-0.5 rounded-md border border-slate-700/50 font-medium">
+                    {t.tag}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. 常见问题 QA */}
+      <section id="faq" className="py-20 bg-slate-900/50 backdrop-blur-xl border-t border-slate-800/50">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-[-0.8px]">
+              ChatGPT 充值常见问题 QA
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              整理了用户最关心的 ChatGPT 充值问题，找不到答案可直接联系客服。
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+            {FAQ_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setActiveFaq(null);
+                }}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  selectedCategory === cat
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-slate-900/50 backdrop-blur-xl border border-slate-700/50 text-slate-400 hover:bg-slate-800/50"
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            {filteredFaqs.map((faq, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl border border-slate-700/50/80 bg-slate-900/50 backdrop-blur-xl overflow-hidden shadow-2xs"
+              >
+                <button
+                  onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                  className="w-full p-5 text-left flex items-center justify-between text-sm sm:text-base font-bold text-white hover:text-indigo-600 transition-colors"
+                >
+                  <span>{faq.q}</span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-slate-500 transition-transform ${activeFaq === idx ? "rotate-180 text-indigo-600" : ""}`}
+                  />
+                </button>
+                {activeFaq === idx && (
+                  <div className="px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed border-t border-slate-800/50 pt-3">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-8 text-xs text-slate-500">
+            没有找到你的问题？
+            <a href="#" className="text-indigo-600 underline font-medium">
+              点击右下角联系客服
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. 页脚（纯黑收拢底座） */}
+      <footer className="py-16 bg-[#0D0E15] text-[#9CA3AF] text-sm">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
+                  G
+                </div>
+                <span className="font-bold text-lg text-white">ChatGPT Pro</span>
+              </div>
+              <p className="text-slate-500 text-xs sm:text-sm max-w-sm mb-4 leading-relaxed">
+                专业的 ChatGPT Plus / Pro 充值服务平台，支持支付宝、微信支付，2
+                分钟快速到账，充值失败 100% 立即退款。
+              </p>
+              <div className="text-slate-400 text-xs">
+                客服工作时间：每天 9:00 – 23:00（紧急问题 15 分钟内响应）
+              </div>
+            </div>
+
+            <div>
+              <div className="text-white font-bold text-sm mb-3">
+                ChatGPT 充值
+              </div>
+              <ul className="space-y-2 text-slate-500 text-xs sm:text-sm">
+                <li>
+                  <a
+                    href="#pricing"
+                    className="hover:text-white transition-colors"
+                  >
+                    ChatGPT Plus 代充
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="hover:text-white transition-colors"
+                  >
+                    ChatGPT Pro 升级
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="hover:text-white transition-colors"
+                  >
+                    Codex 额度充值
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="hover:text-white transition-colors"
+                  >
+                    API 额度充值
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="text-white font-bold text-sm mb-3">
+                AI 矩阵订阅
+              </div>
+              <ul className="space-y-2 text-slate-500 text-xs sm:text-sm">
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Claude 3.5 订阅
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Grok / SuperGrok
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Gemini Pro 充值
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    Cursor Pro 激活
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <div className="text-white font-bold text-sm mb-3">
+                帮助与支持
+              </div>
+              <ul className="space-y-2 text-slate-500 text-xs sm:text-sm">
+                <li>
+                  <a href="#faq" className="hover:text-white transition-colors">
+                    常见问题 FAQ
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#process"
+                    className="hover:text-white transition-colors"
+                  >
+                    充值教程与排查
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#pricing"
+                    className="hover:text-white transition-colors"
+                  >
+                    查询订单
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">
+                    收款凭证示例
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <p>
+              本站为独立第三方技术服务平台，非 OpenAI 官方网站，与 OpenAI
+              无隶属关系。© 2025–2026 ChatGPT Pro. All rights reserved.
+            </p>
+            <div className="flex gap-6 font-medium text-slate-500">
+              <a href="#" className="hover:text-white transition-colors">
+                关于我们
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                隐私政策
+              </a>
+              <a href="#" className="hover:text-white transition-colors">
+                服务条款
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+      {/* 9. 右下角常驻在线客服按钮 */}
+      <div className="fixed bottom-6 right-6 z-40">
+        <a
+          href="https://work.weixin.qq.com/ca/cawcde60678a3fe1d6"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-3 rounded-full shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"
+        >
+          <MessageCircle className="w-5 h-5" />
+          <span className="text-sm">在线客服</span>
+        </a>
+      </div>
+    </div>
+  );
+}

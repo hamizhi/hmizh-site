@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="/favicon.jpg">
+    <link rel="apple-touch-icon" href="/favicon.jpg">
+
+    <title>关于我们 - AIchongzhi.org AI 会员充值平台</title>
+    <meta name="description"
+        content="了解 AIchongzhi.org 的服务范围、交易边界和客服核验方式。本站是独立第三方 AI 会员商品信息与购买入口，覆盖 ChatGPT、Claude、Gemini、Grok；付款、交付与退款由第三方收银台显示的卖方负责，并公开内容来源、风险披露原则及信息纠错渠道，供下单前复核责任范围与相关风险。">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://aichongzhi.org/about" />
+
+    <meta name="google-site-verification" content="dMGoYkxPFvvqbA4sY2-s2w5C2-DHAaOAVTv4dLZPwMY" />
+    <meta name="baidu-site-verification" content="codeva-8xrTKJIWan" />
+    <meta name="msvalidate.01" content="F4D04BCE40E6BB355D1C33068C945CD9" />
+
+    <link rel="stylesheet" href="/css/analytics-consent.css">
+    <script src="/js/analytics-consent.js"></script>
+
+    <meta property="og:title" content="关于我们 - AIchongzhi.org">
+    <meta property="og:description" content="独立第三方 AI 会员商品信息与购买入口，公开服务范围、交易边界、交付方式与客服核验渠道。">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AIchongzhi.org">
+    <meta property="og:url" content="https://aichongzhi.org/about">
+    <meta property="og:image" content="https://aichongzhi.org/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="关于 AIchongzhi.org">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://aichongzhi.org/images/og-image.jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Geist+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="/css/nav-dropdown.css">
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "@id": "https://aichongzhi.org/#organization",
+        "name": "AIchongzhi.org",
+        "url": "https://aichongzhi.org/",
+        "description": "AI 会员商品信息、购买入口与客服核验网站",
+        "logo": { "@type": "ImageObject", "url": "https://aichongzhi.org/logo.png", "width": 512, "height": 512 },
+        "contactPoint": { "@type": "ContactPoint", "contactType": "customer service", "url": "https://aichongzhi.org/about", "availableLanguage": ["zh-CN"] }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "首页", "item": "https://aichongzhi.org/" },
+            { "@type": "ListItem", "position": 2, "name": "关于我们", "item": "https://aichongzhi.org/about" }
+        ]
+    }
+    </script>
+
+    <style>
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 3rem 0; padding: 2rem; background: var(--color-bg-elev); border-radius: 1rem; border: 1px solid var(--color-border); }
+        .stat { text-align: center; padding: 0.5rem; }
+        .stat-num { font-family: var(--font-display); font-size: 2.25rem; font-weight: 800; letter-spacing: -0.025em; color: var(--color-text); line-height: 1; margin-bottom: 0.5rem; font-variant-numeric: tabular-nums; }
+        .stat-label { font-size: 0.85rem; color: var(--color-text-soft); }
+
+        .timeline { display: flex; flex-direction: column; gap: 1.5rem; margin: 1.5rem 0; }
+        .timeline-row { display: grid; grid-template-columns: 110px 1fr; gap: 1.5rem; align-items: start; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-border); }
+        .timeline-row:last-child { border-bottom: 0; }
+        .timeline-date { font-family: var(--font-mono); font-size: 0.85rem; color: var(--color-accent); padding-top: 0.125rem; font-weight: 600; }
+        .timeline-text { color: var(--color-text-muted); line-height: 1.6; }
+
+        .alert { background: var(--color-accent-soft); border-left: 3px solid var(--color-accent); padding: 1rem 1.25rem; border-radius: 0.5rem; margin: 1.5rem 0; }
+        .alert strong { color: var(--color-text); }
+        .alert p { color: var(--color-text-muted); font-size: 0.95rem; line-height: 1.6; margin-top: 0.25rem; }
+
+        .why-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1.5rem 0; padding: 0; list-style: none; }
+        .why-item { padding: 1.25rem; background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 0.75rem; }
+        .why-item-title { font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem; font-size: 1rem; }
+        .why-item-desc { color: var(--color-text-muted); font-size: 0.9rem; line-height: 1.55; }
+
+        .contact-block { padding: 2.5rem; background: var(--color-text); color: var(--color-bg); border-radius: 1rem; margin-top: 3rem; }
+        .contact-block h2 { color: var(--color-bg); margin-top: 0 !important; }
+        .contact-block p { color: rgba(250, 250, 249, 0.7); }
+        .contact-row { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-top: 1.5rem; font-size: 0.95rem; }
+        .contact-row > div { display: flex; align-items: center; gap: 0.5rem; color: rgba(250, 250, 249, 0.85); }
+        .contact-wechat { font-family: var(--font-mono); background: rgba(250, 250, 249, 0.15); padding: 0.25rem 0.5rem; border-radius: 0.375rem; }
+    </style>
+</head>
+
+<body>
+    <!-- 主导航 -->
+    <nav class="nav-main" aria-label="主导航">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M3 12L9 6V18L3 12Z" fill="currentColor"/>
+                    <path d="M21 12L15 6V18L21 12Z" fill="currentColor" opacity="0.5"/>
+                </svg>
+                <span>AIchongzhi.org</span>
+            </a>
+            <div class="nav-links">
+                <a href="/chatgpt/">ChatGPT</a>
+                <a href="/gemini/">Gemini</a>
+                <a href="/claude/">Claude</a>
+                <a href="/grok/">Grok</a>
+                <a href="/blog/">攻略</a>
+                <div class="nav-tool">
+                    <button class="nav-tool-trigger" aria-haspopup="true" aria-expanded="false" type="button">
+                        工具
+                        <svg class="nav-tool-chevron" viewBox="0 0 16 16" fill="none">
+                            <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <div class="nav-tool-panel" role="menu">
+                        <a href="#" class="nav-tool-item is-placeholder" role="menuitem">
+                            <div class="nav-tool-item-icon">·</div>
+                            <div class="nav-tool-item-body">
+                                <div class="nav-tool-item-name">敬请期待</div>
+                                <div class="nav-tool-item-desc">第一批 AI 工具开发中</div>
+                            </div>
+                        </a>
+                        <div class="nav-tool-foot">// 工具陆续上线</div>
+                    </div>
+                </div>
+                <a href="/about" class="active">关于</a>
+            </div>
+            <div class="nav-actions">
+                <a href="https://www.qfcc99.com/shop/BFB74B07" target="_blank" rel="noopener sponsored" class="btn btn-primary-new">立即购买</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-shell">
+        <span class="page-eyebrow">关于我们 · 愿景</span>
+        <h1 class="page-title">让世界顶级的 AI，<br>触手可及</h1>
+        <p class="page-lede">
+            <em style="color:var(--color-accent);font-weight:600;font-style:italic;">让 AI 伴你向上生长。</em><br>
+            AIchongzhi.org 提供主流 AI 会员商品介绍、下单入口与客服核验。<br>
+            本站是独立第三方服务平台，与 OpenAI、Anthropic、Google、xAI 不存在官方代理、授权或合作关系。
+        </p>
+
+        <!-- 数据 -->
+        <section class="stats">
+            <div class="stat"><div class="stat-num">4 类</div><div class="stat-label">AI 订阅品类</div></div>
+            <div class="stat"><div class="stat-num">11 个</div><div class="stat-label">当前核对的商品 SKU</div></div>
+            <div class="stat"><div class="stat-num">08-19</div><div class="stat-label">最近一次收银台核对</div></div>
+            <div class="stat"><div class="stat-num">第三方</div><div class="stat-label">服务性质</div></div>
+        </section>
+
+        <div class="prose">
+            <h2>我们的故事</h2>
+            <p><strong>AIchongzhi.org</strong> 是商品信息与客服核验入口。我们的目标是把产品、价格、交付方式和售后边界说明清楚，帮助用户选择适合自己的 ChatGPT Plus、Claude Pro、Gemini AI Pro、Grok 等订阅产品。</p>
+            <p>购买会跳转至 <code>www.qfcc99.com</code>。具体订单的合同相对方、收款主体、发货/充值、开票与退款责任，以付款前收银台和支付凭证显示的商户为准；本站客服可协助核验和转交问题，但不替代下单页所示卖方。若结账页没有清楚显示卖方信息或与本站说明冲突，请暂停付款。</p>
+            <p>不同商品采用不同交付方式：多数卡密类商品通常无需提供 AI 账号密码；部分人工充值商品（例如特定的 Gemini 自有账号充值、Grok 年度商品）会在下单页明确提示需要的账号资料。请在付款前逐项核对商品说明，不愿提供密码时请勿选择需要密码的商品。</p>
+
+            <div class="alert">
+                <strong>⚠ 重要提醒</strong>
+                <p><code>aichongzhi.org</code> 是本站域名，本站公布的客服微信仅为 <code>gptpro5566</code>。购买会跳转到第三方收银台；当前收银台可能显示不同店名，商品描述也可能列出其他客服号，请先通过本站客服核验，确认前不要发送账号资料或另行付款。</p>
+            </div>
+
+            <h2>为什么选择我们</h2>
+            <ul class="why-list" style="list-style:none; padding: 0; margin-left: 0;">
+                <li class="why-item">
+                    <div class="why-item-title">独立第三方服务</div>
+                    <div class="why-item-desc">公开说明与各 AI 厂商不存在官方代理、授权或合作关系</div>
+                </li>
+                <li class="why-item">
+                    <div class="why-item-title">分产品交付</div>
+                    <div class="why-item-desc">卡密与人工充值要求不同，具体资料和时效以下单页为准</div>
+                </li>
+                <li class="why-item">
+                    <div class="why-item-title">便捷支付</div>
+                    <div class="why-item-desc">支持支付宝 / 微信等国内主流支付方式</div>
+                </li>
+                <li class="why-item">
+                    <div class="why-item-title">第三方收银台</div>
+                    <div class="why-item-desc">付款和订单由第三方交易平台承载，付款前可查看商品条件</div>
+                </li>
+                <li class="why-item">
+                    <div class="why-item-title">明确售后边界</div>
+                    <div class="why-item-desc">卖方负责交付、换货与退款；本站客服仅协助核验或转交</div>
+                </li>
+                <li class="why-item">
+                    <div class="why-item-title">隐私保护</div>
+                    <div class="why-item-desc">只按已核验商品要求提交最少资料，完成后立即修改临时密码</div>
+                </li>
+            </ul>
+
+            <h2>价格与规则更新记录</h2>
+            <p><strong>2026-08-14：</strong>重新对照第三方收银台的 11 个当前商品，修正 Claude Max 5× / 20× 价格、Gemini 3 / 6 / 12 个月时长与价格，以及 Grok 3 个月卡密价格。部署校验会直接查询收银台商品接口；价格、时长或密码要求有变化时，校验失败并阻止发布。</p>
+
+            <h2>内容与核验标准</h2>
+            <p>本站的功能说明与使用教程优先引用对应产品的官方帮助中心、公告或文档；攻略文章在文末列出主要来源，并标注发布或更新日期。模型名称、套餐权益和访问条件可能随厂商调整，页面会在核实后更新，不把传闻或个别案例写成普遍承诺。</p>
+            <p>商品价格、交付方式、账号资料要求、有效期与售后限制，以第三方收银台当前可见商品说明为核验基线。本站会把影响购买决定的条件写在对应产品页，并明确区分卡密、人工充值和成品账号。若页面信息与付款前商品页不一致，请暂停下单并通过官网客服反馈。</p>
+            <p>我们不购买链接、不复制其他网站内容，也不以虚构销量、成功率、用户数量或“绝不封号”等无法验证的说法吸引下单。发现事实错误或失效来源时，可通过下方客服提交具体页面与问题，我们会复核并更正。</p>
+        </div>
+
+        <!-- 联系块 -->
+        <div class="contact-block">
+            <h2 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 0.75rem;">遇到问题？联系我们</h2>
+            <p>商品要求、收银台身份或售后规则不清楚时，请先通过本站公布的客服渠道核验。</p>
+            <div class="contact-row">
+                <div>客服微信 <span class="contact-wechat">gptpro5566</span></div>
+                <div>官网 <span class="contact-wechat">aichongzhi.org</span></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-main">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <a href="/" class="footer-logo">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M3 12L9 6V18L3 12Z" fill="currentColor"/>
+                        <path d="M21 12L15 6V18L21 12Z" fill="currentColor" opacity="0.5"/>
+                    </svg>
+                    <span>AIchongzhi.org</span>
+                </a>
+                <p class="footer-tagline">让 AI 伴你向上生长 · ChatGPT · Claude · Gemini · Grok 一站式代充</p>
+            </div>
+            <nav class="footer-cols" aria-label="Footer 导航">
+                <div class="footer-col">
+                    <h4>充值服务</h4>
+                    <a href="/chatgpt/">ChatGPT Plus</a>
+                    <a href="/claude/">Claude Pro</a>
+                    <a href="/gemini/">Gemini AI Pro</a>
+                    <a href="/grok/">Grok</a>
+                </div>
+                <div class="footer-col">
+                    <h4>资源</h4>
+                    <a href="/blog/">攻略</a>
+                    <a href="/blog/chatgpt-plus-guide">ChatGPT Plus 指南</a>
+                </div>
+                <div class="footer-col">
+                    <h4>关于</h4>
+                    <a href="/about">关于我们</a>
+                    <a href="/privacy">隐私政策</a>
+                    <a href="/terms">服务条款</a>
+                </div>
+                <div class="footer-col">
+                    <h4>联系</h4>
+                    <span class="footer-contact-static">客服微信</span>
+                    <code class="footer-wechat">gptpro5566</code>
+                </div>
+            </nav>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-inner">
+                <p>© 2024–2026 AIchongzhi.org. 本站仅提供技术服务，与 OpenAI / Anthropic / Google / xAI 无关联关系。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Nav 工具下拉切换逻辑 -->
+    <script src="/js/nav-dropdown.js" defer></script>
+</body>
+
+</html>

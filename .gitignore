@@ -1,0 +1,24 @@
+.env
+.env.local
+.env.*.local
+
+# Local dependencies and build output
+node_modules/
+.next/
+.next-stale-*/
+out/
+.wrangler/
+*.tsbuildinfo
+
+# Local SQLite database
+data/
+
+# Local extraction/build workspace
+work/
+outputs/
+.next-*
+
+# Admin/test scripts with secrets
+check-order.js
+list-orders.js
+manual-complete.js

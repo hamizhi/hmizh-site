@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Plus/Pro 充值 - 终极版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        @keyframes particle {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        .animate-slideIn {
+            animation: slideIn 0.5s ease-out;
+        }
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .glow-indigo {
+            box-shadow: 0 0 60px rgba(99, 102, 241, 0.5), 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+        .glow-purple {
+            box-shadow: 0 0 60px rgba(168, 85, 247, 0.5), 0 0 30px rgba(168, 85, 247, 0.3);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 60px rgba(16, 185, 129, 0.4), 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+        .glow-orange {
+            box-shadow: 0 0 60px rgba(249, 115, 22, 0.5), 0 0 30px rgba(249, 115, 22, 0.3);
+        }
+        .text-glow {
+            text-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* 鼠标跟随光晕 */
+        #cursor-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+            z-index: 1;
+        }
+
+        /* 3D 卡片倾斜效果 */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease;
+        }
+
+        /* 渐变网格背景 */
+        .grid-bg {
+            background-image:
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* 按钮反光效果 */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .btn-shine:hover::before {
+            left: 100%;
+        }
+
+        /* 进度条动画 */
+        .progress-bar {
+            animation: progressFill 60s linear infinite;
+        }
+        @keyframes progressFill {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* 粒子爆炸 */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle 0.8s ease-out forwards;
+        }
+
+        /* 数字滚动 */
+        .counter {
+            display: inline-block;
+            animation: countUp 0.5s ease-out;
+        }
+
+        /* 渐入动画延迟 */
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+
+        /* 脉动边框 */
+        @keyframes borderPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6), 0 0 60px rgba(99, 102, 241, 0.3); }
+        }
+        .border-pulse {
+            animation: borderPulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white antialiased overflow-x-hidden grid-bg">
+    <!-- 鼠标跟随光晕 -->
+    <div id="cursor-glow"></div>
+
+    <!-- 动态背景粒子 - 增强版 -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl -top-48 -left-48 animate-pulse"></div>
+        <div class="absolute w-96 h-96 bg-purple-500/20 rounded-full blur-3xl top-1/2 -right-48 animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -bottom-48 left-1/3 animate-pulse" style="animation-delay: 0.5s;"></div>
+        <div class="absolute w-64 h-64 bg-pink-500/10 rounded-full blur-3xl top-1/4 left-1/2 animate-pulse" style="animation-delay: 1.5s;"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between relative z-10">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-lg shadow-lg glow-indigo">
+                    G
+                </div>
+                <div>
+                    <div class="font-bold text-lg tracking-tight text-white leading-tight">
+                        GPT <span class="text-indigo-400">Pro</span>
+                    </div>
+                    <div class="text-[11px] text-slate-400 font-normal leading-tight">
+                        ChatGPT 订阅服务
+                    </div>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+                <a href="#pricing" class="hover:text-indigo-400 transition-colors">ChatGPT 充值</a>
+                <a href="#pricing" class="hover:text-indigo-400 transition-colors">Pro 专区</a>
+                <a href="#" class="hover:text-indigo-400 transition-colors">充值教程</a>
+                <a href="#" class="hover:text-indigo-400 transition-colors">用户评价</a>
+            </nav>
+
+            <button class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white font-medium transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <span>查询订单</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero 首屏 -->
+    <section class="pt-20 pb-16 text-center relative z-10">
+        <div class="max-w-6xl mx-auto px-6">
+            <!-- 限时优惠倒计时 + 进度条 -->
+            <div class="inline-block mb-6">
+                <div class="relative bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 px-6 py-2.5 rounded-full backdrop-blur-sm overflow-hidden">
+                    <div class="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-orange-500 to-red-500 progress-bar"></div>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span class="text-sm font-bold text-orange-300">
+                            限时优惠剩余：
+                            <span class="text-white mx-1" id="countdown">02:34:18</span>
+                        </span>
+                        <svg class="w-4 h-4 text-orange-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主标题 - 超大 + 渐变 -->
+            <h1 class="font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-purple-300 mb-4 text-glow animate-fadeInUp" style="font-size: clamp(48px, 7vw, 86px); line-height: 1.05; letter-spacing: -2px;">
+                <div>ChatGPT Plus/Pro</div>
+                <div class="mt-1">极速充值</div>
+            </h1>
+
+            <!-- 轮播卖点词 -->
+            <div class="h-14 flex items-center justify-center mb-6 animate-fadeInUp delay-100">
+                <span id="rotating-word" class="font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-glow" style="font-size: clamp(26px, 3.5vw, 38px); letter-spacing: -0.8px; transition: opacity 0.3s ease;">
+                    ⚡ 2分钟极速完成充值
+                </span>
+            </div>
+
+            <!-- 描述 -->
+            <p class="max-w-2xl mx-auto mb-8 text-slate-300 text-lg leading-relaxed animate-fadeInUp delay-200">
+                2 分钟内完成 ChatGPT 充值，让每个人都能轻松订阅
+                <span class="text-indigo-400 font-bold"> Plus/Pro</span>
+            </p>
+
+            <!-- 主按钮 - 超强视觉 -->
+            <div class="flex flex-col items-center gap-4 mb-10 animate-fadeInUp delay-300">
+                <button id="cta-button" class="relative group btn-shine">
+                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl group-hover:blur-2xl transition-all opacity-75"></div>
+                    <div class="relative inline-flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold text-lg px-12 py-5 rounded-full shadow-2xl glow-indigo transition-all group-hover:scale-105 active:scale-95 cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>立即充值</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </div>
+                </button>
+
+                <div class="flex items-center gap-2 text-sm text-slate-400">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>充值失败 100% 退款 · 无需海外信用卡</span>
+                </div>
+            </div>
+
+            <!-- 信任指标 - 发光卡片 + 数字滚动动画 -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+                <div class="relative group animate-fadeInUp delay-400">
+                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                    <div class="relative bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl hover:border-indigo-500/50 transition-all">
+                        <svg class="w-8 h-8 text-indigo-400 mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        <div class="text-3xl font-black text-white mb-1">
+                            <span class="counter" data-target="89763">0</span>+
+                        </div>
+                        <div class="text-sm text-slate-400">位用户已充值</div>
+                    </div>
+                </div>
+
+                <div class="relative group animate-fadeInUp delay-500">
+                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                    <div class="relative bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl hover:border-emerald-500/50 transition-all">
+                        <svg class="w-8 h-8 text-amber-400 mb-3 mx-auto fill-amber-400" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <div class="text-3xl font-black text-white mb-1">4.9/5.0</div>
+                        <div class="text-sm text-slate-400">用户综合好评</div>
+                    </div>
+                </div>
+
+                <div class="relative group animate-fadeInUp delay-600">
+                    <div class="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all"></div>
+                    <div class="relative bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-6 rounded-2xl hover:border-orange-500/50 transition-all">
+                        <svg class="w-8 h-8 text-orange-400 mb-3 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <div class="text-3xl font-black text-white mb-1">2 分钟</div>
+                        <div class="text-sm text-slate-400">极速到账</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 大保障 -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-4xl mx-auto">
+                <div class="flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-5 py-3 rounded-full hover:border-indigo-500/50 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-sm font-bold text-white">售后无忧</div>
+                        <div class="text-xs text-slate-400">失败 100% 退款</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-5 py-3 rounded-full hover:border-emerald-500/50 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-sm font-bold text-white">极速到账</div>
+                        <div class="text-xs text-slate-400">2 分钟自动完成</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 px-5 py-3 rounded-full hover:border-purple-500/50 transition-all group">
+                    <div class="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-sm font-bold text-white">支付便捷</div>
+                        <div class="text-xs text-slate-400">支付宝/微信</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 套餐价格区域 -->
+    <section id="pricing" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-5xl font-black text-white mb-4 tracking-tight">
+                    选择适合你的 <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">AI 套餐</span>
+                </h2>
+                <p class="text-slate-400 text-lg">
+                    所有套餐均享 100% 充值失败退款保障
+                </p>
+                <!-- 本周热销提示 -->
+                <div class="mt-4 inline-flex items-center gap-2 text-sm text-slate-400">
+                    <svg class="w-4 h-4 text-red-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/></svg>
+                    <span>本周已售 <span class="text-white font-bold" id="weekly-sales">1,234</span> 份</span>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 items-stretch">
+                <!-- Go 套餐 -->
+                <div class="relative group card-3d" data-card="go">
+                    <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/30 to-teal-500/30 rounded-3xl blur-2xl group-hover:blur-3xl transition-all opacity-50"></div>
+                    <div class="relative bg-slate-900/80 backdrop-blur-xl border-2 border-slate-700/50 rounded-3xl p-8 hover:border-emerald-500/70 transition-all duration-300 h-full flex flex-col">
+                        <h3 class="text-2xl font-black text-white mb-2">ChatGPT Go</h3>
+                        <div class="inline-block text-xs font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full mb-3 w-fit">
+                            性价比之选
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                            使用更多核心智能额度，写作、了解、创建和聊天都更多。
+                        </p>
+                        <div class="mb-6">
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-medium text-slate-400">¥</span>
+                                <span class="text-6xl font-black text-white tracking-tight">49</span>
+                                <span class="text-slate-400 ml-1">/ 月</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-8 pt-6 border-t border-slate-700/50 flex-grow">
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>更多使用工具的消息额度</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>更多图像创建额度</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>更多记忆和存储空间</span>
+                            </div>
+                        </div>
+                        <button class="w-full py-4 rounded-xl font-bold text-base transition-all duration-200 text-center bg-slate-800 hover:bg-slate-700 text-white hover:scale-105 active:scale-95">
+                            立即购买
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Plus 套餐 - 推荐 + 3D效果增强 -->
+                <div class="relative group md:scale-110 z-10 card-3d" data-card="plus">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg glow-orange animate-bounce z-20">
+                        🔥 爆款热销
+                    </div>
+                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/40 to-purple-500/40 rounded-3xl blur-2xl group-hover:blur-3xl transition-all border-pulse"></div>
+                    <div class="relative bg-slate-900/80 backdrop-blur-xl border-2 border-indigo-500/60 rounded-3xl p-8 hover:border-indigo-500/80 transition-all duration-300 h-full flex flex-col">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-1.5 text-xs text-orange-300 bg-orange-500/10 border border-orange-500/30 px-3 py-1 rounded-full">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                <span class="font-bold">仅剩 <span id="stock-count">23</span> 份</span>
+                            </div>
+                            <div class="text-xs text-slate-400">
+                                <span id="viewing-count">18</span> 人正在查看
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-black text-white mb-2">ChatGPT Plus</h3>
+                        <div class="inline-block text-xs font-bold text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 px-3 py-1 rounded-full mb-3 w-fit">
+                            立减 ¥50
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                            解锁高级智能，越用越懂你的偏好
+                        </p>
+                        <div class="mb-6">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-slate-500 line-through text-lg">¥199</span>
+                                <span class="text-orange-400 font-bold text-sm bg-orange-500/10 px-2 py-0.5 rounded">
+                                    省 ¥50
+                                </span>
+                            </div>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-medium text-slate-400">¥</span>
+                                <span class="text-6xl font-black text-white tracking-tight">149</span>
+                                <span class="text-slate-400 ml-1">/ 月</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-8 pt-6 border-t border-slate-700/50 flex-grow">
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>面向复杂工作的高级智能</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>更高质量的图像生成</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>用 Codex 自动化编码</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>支持开具正规采购凭证</span>
+                            </div>
+                        </div>
+                        <button class="w-full py-4 rounded-xl font-bold text-base transition-all duration-200 text-center bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-xl glow-indigo hover:scale-105 active:scale-95 btn-shine">
+                            立即购买
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Pro 套餐 -->
+                <div class="relative group card-3d" data-card="pro">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-3xl blur-2xl group-hover:blur-3xl transition-all opacity-50"></div>
+                    <div class="relative bg-slate-900/80 backdrop-blur-xl border-2 border-slate-700/50 rounded-3xl p-8 hover:border-purple-500/70 transition-all duration-300 h-full flex flex-col">
+                        <h3 class="text-2xl font-black text-white mb-2">ChatGPT Pro</h3>
+                        <div class="inline-block text-xs font-bold text-purple-300 bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full mb-3 w-fit">
+                            旗舰算力
+                        </div>
+                        <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+                            面向整个工作日都依赖最强智能的用户
+                        </p>
+                        <div class="mb-6">
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-medium text-slate-400">¥</span>
+                                <span class="text-6xl font-black text-white tracking-tight">720</span>
+                                <span class="text-slate-400 ml-1">起 / 月</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3 mb-8 pt-6 border-t border-slate-700/50 flex-grow">
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>最强大的前沿 Pro 模型</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>Dots 全天候在线智能体</span>
+                            </div>
+                            <div class="flex items-start gap-2.5 text-sm text-slate-300">
+                                <svg class="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>提供 3 档使用额度</span>
+                            </div>
+                        </div>
+                        <button class="w-full py-4 rounded-xl font-bold text-base transition-all duration-200 text-center bg-slate-800 hover:bg-slate-700 text-white hover:scale-105 active:scale-95">
+                            立即购买
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 实时购买通知 - 增强版 -->
+    <div id="purchase-notification" class="fixed bottom-24 left-6 z-50 hidden">
+        <div class="bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-4 shadow-2xl glow-indigo max-w-sm animate-slideIn">
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold" id="purchase-avatar">
+                        张
+                    </div>
+                    <div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900 animate-pulse"></div>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-white font-bold text-sm" id="purchase-user">张**</span>
+                        <span class="text-xs text-slate-400" id="purchase-location">北京</span>
+                    </div>
+                    <div class="text-xs text-slate-400">
+                        购买了 <span class="text-indigo-400 font-semibold" id="purchase-plan">ChatGPT Plus</span>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-500" id="purchase-time">
+                    刚刚
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右下角客服按钮 -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button class="relative group">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl group-hover:blur-2xl transition-all"></div>
+            <div class="relative flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold px-6 py-4 rounded-full shadow-2xl glow-indigo transition-all group-hover:scale-110 active:scale-95">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                <span>在线客服</span>
+            </div>
+        </button>
+    </div>
+
+    <script>
+        // 鼠标跟随光晕
+        const cursorGlow = document.getElementById('cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            cursorGlow.style.left = e.clientX + 'px';
+            cursorGlow.style.top = e.clientY + 'px';
+        });
+
+        // 3D 卡片倾斜效果
+        document.querySelectorAll('.card-3d').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+
+        // 数字滚动动画
+        function animateCounter(element, target, duration = 2000) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= target) {
+                    element.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(start).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // 页面加载后执行数字滚动
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.counter').forEach(counter => {
+                const target = parseInt(counter.dataset.target);
+                animateCounter(counter, target);
+            });
+        });
+
+        // 轮播卖点词
+        const words = [
+            '⚡ 2分钟极速完成充值',
+            '🔒 官方正规充值通道',
+            '💳 无需海外信用卡',
+            '✅ 充值不成功100%退款',
+            '👥 已服务 8.9万+ 用户',
+            '💬 24小时在线客服'
+        ];
+        let currentIndex = 0;
+        const wordElement = document.getElementById('rotating-word');
+
+        setInterval(() => {
+            wordElement.style.opacity = '0';
+            setTimeout(() => {
+                currentIndex = (currentIndex + 1) % words.length;
+                wordElement.textContent = words[currentIndex];
+                wordElement.style.opacity = '1';
+            }, 300);
+        }, 2500);
+
+        // 倒计时
+        let hours = 2, minutes = 34, seconds = 18;
+        setInterval(() => {
+            seconds--;
+            if (seconds < 0) {
+                seconds = 59;
+                minutes--;
+            }
+            if (minutes < 0) {
+                minutes = 59;
+                hours--;
+            }
+            if (hours < 0) {
+                hours = 23;
+            }
+            document.getElementById('countdown').textContent =
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+        }, 1000);
+
+        // 库存动态减少
+        let stock = 23;
+        setInterval(() => {
+            if (stock > 15 && Math.random() > 0.7) {
+                stock--;
+                document.getElementById('stock-count').textContent = stock;
+                // 添加闪烁效果
+                document.getElementById('stock-count').classList.add('text-red-400');
+                setTimeout(() => {
+                    document.getElementById('stock-count').classList.remove('text-red-400');
+                }, 500);
+            }
+        }, 30000); // 每30秒
+
+        // 查看人数动态变化
+        let viewing = 18;
+        setInterval(() => {
+            viewing = 15 + Math.floor(Math.random() * 10);
+            document.getElementById('viewing-count').textContent = viewing;
+        }, 8000);
+
+        // 本周销量缓慢增长
+        let weeklySales = 1234;
+        setInterval(() => {
+            if (Math.random() > 0.5) {
+                weeklySales++;
+                document.getElementById('weekly-sales').textContent = weeklySales.toLocaleString();
+            }
+        }, 45000);
+
+        // 实时购买通知 - 增强版
+        const purchases = [
+            { name: '张**', avatar: '张', location: '北京', plan: 'ChatGPT Plus', time: '刚刚' },
+            { name: '李**', avatar: '李', location: '上海', plan: 'ChatGPT Pro', time: '1分钟前' },
+            { name: '王**', avatar: '王', location: '深圳', plan: 'ChatGPT Plus', time: '2分钟前' },
+            { name: '陈**', avatar: '陈', location: '广州', plan: 'ChatGPT Plus', time: '3分钟前' },
+            { name: '刘**', avatar: '刘', location: '杭州', plan: 'ChatGPT Go', time: '4分钟前' },
+            { name: '赵**', avatar: '赵', location: '成都', plan: 'ChatGPT Plus', time: '5分钟前' },
+        ];
+        let purchaseIndex = 0;
+
+        function showPurchaseNotification() {
+            const notification = document.getElementById('purchase-notification');
+            const purchase = purchases[purchaseIndex];
+
+            document.getElementById('purchase-avatar').textContent = purchase.avatar;
+            document.getElementById('purchase-user').textContent = purchase.name;
+            document.getElementById('purchase-location').textContent = purchase.location;
+            document.getElementById('purchase-plan').textContent = purchase.plan;
+            document.getElementById('purchase-time').textContent = purchase.time;
+
+            notification.classList.remove('hidden');
+
+            setTimeout(() => {
+                notification.classList.add('hidden');
+                purchaseIndex = (purchaseIndex + 1) % purchases.length;
+            }, 5000);
+        }
+
+        setInterval(showPurchaseNotification, 8000);
+        setTimeout(showPurchaseNotification, 2000);
+
+        // 按钮点击粒子爆炸效果
+        document.getElementById('cta-button').addEventListener('click', function(e) {
+            const button = e.currentTarget;
+            const rect = button.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = `hsl(${Math.random() * 60 + 220}, 100%, 60%)`;
+                particle.style.setProperty('--tx', `${(Math.random() - 0.5) * 200}px`);
+                particle.style.setProperty('--ty', `${(Math.random() - 0.5) * 200}px`);
+                button.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 800);
+            }
+        });
+    </script>
+</body>
+</html>
