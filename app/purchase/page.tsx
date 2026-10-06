@@ -170,7 +170,7 @@ export default function PurchasePage() {
         orderId: data.orderId,
         planId: plan.id,
         planTitle: plan.title,
-        price: plan.price,
+        price: getCurrentPrice(),
         phone,
         payType,
         createdAt: Date.now(),
