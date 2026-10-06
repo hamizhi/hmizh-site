@@ -4,7 +4,7 @@
   "description": "当前目录包含参考站首页的本地静态快照，以及页面所需的 CSS、JavaScript、图片和图标资源。 常用站内页面也已保存到对应目录，导航可以继续在本地打开。",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3004",
     "build": "next build",
     "start": "next start"
   },
