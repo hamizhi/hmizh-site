@@ -132,7 +132,7 @@ const PLANS = [
     name: "ChatGPT Go",
     tag: "新手入门",
     badge: "性价比之选",
-    price: "1",
+    price: "50",
     period: "/ 月",
     originalPrice: "49",
     dailyPrice: "新用户首选",

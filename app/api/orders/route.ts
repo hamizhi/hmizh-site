@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 const PLANS = {
   go: {
     title: "ChatGPT Go / 月",
-    price: 1,
+    price: 50,
   },
   plus: {
     title: "ChatGPT Plus 一键升级 / 月",
