@@ -1,16 +1,15 @@
 "use client";
 
 import {
-  CreditCard,
-  DollarSign,
-  Layers,
-  Lock,
-  PackageCheck,
-  PlusCircle,
-  RefreshCw,
+  BarChart3,
+  Package,
+  FileText,
+  Upload,
+  Send,
   Search,
   Trash2,
-  TrendingUp,
+  RefreshCw,
+  Home,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -22,8 +21,8 @@ type Stats = {
   stockGo: number;
   stockPlus: number;
   stockPro5x: number;
-  stockPro: number;
-  stockAccount: number;
+  stockPro20x: number;
+  stockPro50x: number;
 };
 
 type Order = {
@@ -49,10 +48,13 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentView, setCurrentView] = useState<"dashboard" | "stock" | "import" | "orders" | "issue">("dashboard");
+
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
   const [searchKey, setSearchKey] = useState("");
+  const [stockFilter, setStockFilter] = useState<"unused" | "used">("unused");
 
   // CDK 发码相关状态
   const [issuePlan, setIssuePlan] = useState("plus");
@@ -61,6 +63,8 @@ export default function AdminPage() {
   const [issueCurrency, setIssueCurrency] = useState("USD");
   const [issuing, setIssuing] = useState(false);
   const [issuedCdks, setIssuedCdks] = useState<string[]>([]);
+  const [selectedCdks, setSelectedCdks] = useState<string[]>([]);
+
   const [importPlan, setImportPlan] = useState("plus");
   const [importText, setImportText] = useState("");
   const [importing, setImporting] = useState(false);
@@ -145,7 +149,6 @@ export default function AdminPage() {
     await loadData();
   };
 
-  // 处理 CDK 发码
   const handleIssueCdk = async () => {
     if (issueCount < 1 || issueCount > 100) {
       alert("发放数量必须在 1-100 之间");
@@ -179,9 +182,9 @@ export default function AdminPage() {
       }
 
       setIssuedCdks(data.cdks || []);
+      setSelectedCdks([]); // 重置选择
       alert(`成功发放 ${data.cdks?.length || 0} 张 CDK！`);
 
-      // 刷新数据
       await loadData();
     } catch (error) {
       alert(`网络错误: ${error instanceof Error ? error.message : "未知错误"}`);
@@ -190,433 +193,587 @@ export default function AdminPage() {
     }
   };
 
+  const handleImportIssuedCdks = async () => {
+    if (selectedCdks.length === 0) {
+      alert("请至少选择一个 CDK");
+      return;
+    }
+
+    setImporting(true);
+
+    try {
+      const response = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "import_cards",
+          password,
+          planId: issuePlan,
+          cardCodes: selectedCdks.join("\n"),
+        }),
+      });
+      const data = await response.json();
+      alert(data.message);
+
+      if (data.success) {
+        // 从已发放列表中移除已导入的
+        setIssuedCdks(prev => prev.filter(cdk => !selectedCdks.includes(cdk)));
+        setSelectedCdks([]);
+        await loadData();
+      }
+    } catch {
+      alert("网络连接异常");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const toggleCdkSelection = (cdk: string) => {
+    setSelectedCdks(prev =>
+      prev.includes(cdk) ? prev.filter(c => c !== cdk) : [...prev, cdk]
+    );
+  };
+
+  const toggleSelectAllCdks = () => {
+    if (selectedCdks.length === issuedCdks.length) {
+      setSelectedCdks([]);
+    } else {
+      setSelectedCdks([...issuedCdks]);
+    }
+  };
+
   if (!isAuthed) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] p-4">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <form
           onSubmit={handleLogin}
-          className="w-full max-w-sm rounded-3xl border border-gray-200 bg-white p-8 shadow-xl"
+          className="w-full max-w-sm rounded-2xl border border-slate-700/50 bg-slate-900/90 backdrop-blur-xl p-8 shadow-2xl"
         >
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-            <Lock className="h-6 w-6" />
+          <div className="mb-6 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400">
+              <Package className="h-7 w-7" />
+            </div>
+            <h1 className="text-2xl font-bold text-white">GETGPT 管理后台</h1>
+            <p className="mt-2 text-sm text-slate-400">请输入管理密码登录</p>
           </div>
-          <h1 className="text-center text-xl font-bold text-gray-900">
-            GETGPT 运营管理后台
-          </h1>
-          <p className="mt-1 text-center text-xs text-gray-400">
-            仅限管理员登录
-          </p>
 
-          <div className="my-6">
-            <input
-              type="password"
-              placeholder="请输入管理密码"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-indigo-600"
-              required
-            />
-          </div>
+          <input
+            type="password"
+            placeholder="管理密码"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-3 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            required
+          />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+            className="mt-4 w-full rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
           >
-            {loading ? "验证中..." : "进入后台"}
+            {loading ? "登录中..." : "登录"}
           </button>
         </form>
       </div>
     );
   }
 
-  const filteredOrders = orders.filter((order) =>
-    searchKey
-      ? order.phone.includes(searchKey) || order.order_id.includes(searchKey)
-      : true,
-  );
+  const planNames: Record<string, string> = {
+    go: "ChatGPT Go",
+    plus: "ChatGPT Plus",
+    pro_5x: "Pro 5x",
+    pro_20x: "Pro 20x",
+    pro_50x: "Pro 50x",
+  };
+
+  const filteredCards = cards.filter((c) => {
+    const matchesSearch = c.card_code.toLowerCase().includes(searchKey.toLowerCase());
+    const matchesStatus = stockFilter === "unused" ? !c.is_used : c.is_used;
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] pb-24 text-gray-900">
-      <header className="sticky top-0 z-20 border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* 左侧导航栏 */}
+      <aside className="w-56 border-r border-slate-700/50 bg-slate-900/50 backdrop-blur-xl">
+        <div className="p-6">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 font-bold text-white">
-              G
-            </span>
-            <span className="font-extrabold text-gray-900">
-              GETGPT 独角数卡控制台
-            </span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10">
+              <Package className="h-5 w-5 text-indigo-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white">GETGPT</h2>
+              <p className="text-xs text-slate-400">管理后台</p>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => loadData()}
-            className="flex items-center gap-1.5 rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50"
-          >
-            <RefreshCw className="h-3.5 w-3.5" /> 刷新数据
-          </button>
         </div>
-      </header>
 
-      <main className="mx-auto max-w-6xl space-y-8 px-6 pt-8">
-        <section className="grid gap-4 sm:grid-cols-4">
-          <CardStat
-            title="今日销售额"
-            value={`¥${stats?.todayRevenue ?? 0}`}
-            icon={<TrendingUp className="text-emerald-500" />}
-          />
-          <CardStat
-            title="累计总销售额"
-            value={`¥${stats?.totalRevenue ?? 0}`}
-            icon={<DollarSign className="text-indigo-600" />}
-          />
-          <CardStat
-            title="已成交订单 / 总订单"
-            value={`${stats?.paidOrders ?? 0} / ${stats?.totalOrders ?? 0}`}
-            icon={<PackageCheck className="text-blue-500" />}
-          />
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="mb-2 text-xs font-bold text-gray-500">
-              实时剩余库存
-            </div>
-            <div className="space-y-1 text-xs">
-              <StockRow label="Go" value={stats?.stockGo ?? 0} />
-              <StockRow label="Plus 升级" value={stats?.stockPlus ?? 0} />
-              <StockRow label="Pro $100/$200/$500" value={stats?.stockPro5x ?? 0} />
-              <StockRow label="Pro 充值" value={stats?.stockPro ?? 0} />
-              <StockRow label="Plus 成品号" value={stats?.stockAccount ?? 0} />
-            </div>
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="mb-4 flex items-center gap-2 font-bold text-gray-900">
-            <PlusCircle className="h-5 w-5 text-indigo-600" />
-            <span>批量导入充值卡密</span>
-            <span className="text-xs font-normal text-gray-400">
-              （一行一个卡密，自动去重）
-            </span>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-4">
-            <div className="space-y-3 sm:col-span-1">
-              <label className="block text-xs font-bold text-gray-700">
-                导入至商品方案
-              </label>
-              <select
-                value={importPlan}
-                onChange={(event) => setImportPlan(event.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-sm"
-              >
-                <option value="go">ChatGPT Go (go)</option>
-                <option value="plus">ChatGPT Plus 升级 (plus)</option>
-                <option value="pro-5x">ChatGPT Pro $100/$200/$500 (pro-5x)</option>
-                <option value="pro">ChatGPT Pro 充值 (pro)</option>
-                <option value="account">ChatGPT Plus 成品号 (account)</option>
-              </select>
-              <button
-                type="button"
-                onClick={handleImport}
-                disabled={importing}
-                className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {importing ? "正在导入..." : "确认批量导入"}
-              </button>
-            </div>
-
-            <div className="sm:col-span-3">
-              <textarea
-                rows={4}
-                placeholder={"请粘贴卡密，一行一个，例如：\nEVER-8GRV-T77X-ZX5E\nEVER-AAAA-BBBB-CCCC"}
-                value={importText}
-                onChange={(event) => setImportText(event.target.value)}
-                className="w-full rounded-2xl border border-gray-200 p-3 font-mono text-xs outline-none focus:border-indigo-600"
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2 font-bold text-gray-900">
-              <CreditCard className="h-5 w-5 text-indigo-600" />
-              <span>订单流水</span>
-            </div>
-            <div className="relative w-72">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="搜索手机号 / 订单号..."
-                value={searchKey}
-                onChange={(event) => setSearchKey(event.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-4 text-xs outline-none focus:border-indigo-600 focus:bg-white"
-              />
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="border-b border-gray-100 bg-gray-50 text-gray-500">
-                <tr>
-                  <th className="p-3">订单号 / 时间</th>
-                  <th className="p-3">手机号</th>
-                  <th className="p-3">购买方案</th>
-                  <th className="p-3">实付金额</th>
-                  <th className="p-3">支付状态</th>
-                  <th className="p-3">分配的卡密</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="p-6 text-center text-gray-400">
-                      暂无订单记录
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order.order_id} className="hover:bg-gray-50">
-                      <td className="p-3 font-mono">
-                        <div className="font-bold text-gray-900">
-                          {order.order_id}
-                        </div>
-                        <div className="text-[10px] text-gray-400">
-                          {order.created_at}
-                        </div>
-                      </td>
-                      <td className="p-3 font-mono font-medium">
-                        {order.phone}
-                      </td>
-                      <td className="p-3 font-medium">
-                        {order.plan_name || order.plan_id}
-                      </td>
-                      <td className="p-3 font-mono font-bold text-indigo-600">
-                        ¥{order.money}
-                      </td>
-                      <td className="p-3">
-                        <span
-                          className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
-                            order.status === "paid"
-                              ? "bg-emerald-50 text-emerald-600"
-                              : "bg-amber-50 text-amber-600"
-                          }`}
-                        >
-                          {order.status === "paid" ? "已支付" : "待支付"}
-                        </span>
-                      </td>
-                      <td className="p-3 font-mono font-bold text-gray-800">
-                        {order.card_code || "-"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="space-y-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 font-bold text-gray-900">
-            <Layers className="h-5 w-5 text-indigo-600" />
-            <span>卡密库存明细</span>
-          </div>
-
-          <div className="max-h-96 overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="sticky top-0 border-b border-gray-100 bg-gray-50 text-gray-500">
-                <tr>
-                  <th className="p-3">卡密内容</th>
-                  <th className="p-3">所属方案</th>
-                  <th className="p-3">状态</th>
-                  <th className="p-3">绑定订单</th>
-                  <th className="p-3 text-right">操作</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 font-mono">
-                {cards.map((card) => (
-                  <tr key={card.id} className="hover:bg-gray-50">
-                    <td className="p-3 font-bold text-gray-800">
-                      {card.card_code}
-                    </td>
-                    <td className="p-3 font-sans capitalize">{card.plan_id}</td>
-                    <td className="p-3">
-                      <span
-                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
-                          card.is_used
-                            ? "bg-gray-100 text-gray-400"
-                            : "bg-emerald-50 text-emerald-600"
-                        }`}
-                      >
-                        {card.is_used ? "已售出" : "未售出"}
-                      </span>
-                    </td>
-                    <td className="p-3 text-gray-500">
-                      {card.order_id || "-"}
-                    </td>
-                    <td className="p-3 text-right">
-                      {!card.is_used && (
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(card.id)}
-                          className="text-gray-400 hover:text-rose-600"
-                          aria-label="删除卡密"
-                        >
-                          <Trash2 className="inline h-3.5 w-3.5" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* CDK 在线发放 */}
-        <section className="space-y-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center gap-2 font-bold text-gray-900">
-            <PackageCheck className="h-5 w-5 text-indigo-600" />
-            <span>在线发放 CDK</span>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-bold text-gray-700">
-                套餐类型
-              </label>
-              <select
-                value={issuePlan}
-                onChange={(e) => setIssuePlan(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none"
-              >
-                <option value="go">ChatGPT Go</option>
-                <option value="plus">ChatGPT Plus</option>
-                <option value="pro_5x">Pro 5x</option>
-                <option value="pro_10x">Pro 10x</option>
-                <option value="pro_25x">Pro 25x</option>
-                <option value="pro_50x">Pro 50x</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-bold text-gray-700">
-                发放数量
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                value={issueCount}
-                onChange={(e) => setIssueCount(Number(e.target.value))}
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-bold text-gray-700">
-                付款地区
-              </label>
-              <select
-                value={issueCountry}
-                onChange={(e) => {
-                  setIssueCountry(e.target.value);
-                  // 自动设置对应货币
-                  const currencyMap: Record<string, string> = {
-                    US: "USD",
-                    JP: "JPY",
-                    PH: "PHP",
-                    CL: "CLP",
-                    EG: "EGP",
-                    NG: "NGN",
-                    TR: "TRY",
-                  };
-                  setIssueCurrency(currencyMap[e.target.value] || "USD");
-                }}
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:border-indigo-500 focus:outline-none"
-              >
-                <option value="US">美国 (US)</option>
-                <option value="JP">日本 (JP)</option>
-                <option value="PH">菲律宾 (PH)</option>
-                <option value="CL">智利 (CL)</option>
-                <option value="EG">埃及 (EG)</option>
-                <option value="NG">尼日利亚 (NG)</option>
-                <option value="TR">土耳其 (TR)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-xs font-bold text-gray-700">
-                付款货币
-              </label>
-              <input
-                type="text"
-                value={issueCurrency}
-                readOnly
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm"
-              />
-            </div>
-          </div>
-
+        <nav className="px-3">
           <button
-            type="button"
-            onClick={handleIssueCdk}
-            disabled={issuing}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+            onClick={() => setCurrentView("dashboard")}
+            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              currentView === "dashboard"
+                ? "bg-indigo-500/10 text-indigo-400"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
           >
-            <PlusCircle className="h-4 w-4" />
-            {issuing ? "发放中..." : "立即发放"}
+            <Home className="h-4 w-4" />
+            仪表盘
           </button>
 
-          {issuedCdks.length > 0 && (
-            <div className="rounded-xl bg-emerald-50 p-4">
-              <div className="mb-2 text-xs font-bold text-emerald-900">
-                已发放 {issuedCdks.length} 张 CDK：
-              </div>
-              <div className="max-h-60 space-y-1 overflow-y-auto">
-                {issuedCdks.map((cdk, index) => (
-                  <div
-                    key={index}
-                    className="rounded-lg bg-white p-2 font-mono text-xs text-gray-800"
-                  >
-                    {cdk}
+          <button
+            onClick={() => setCurrentView("stock")}
+            className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              currentView === "stock"
+                ? "bg-indigo-500/10 text-indigo-400"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
+          >
+            <Package className="h-4 w-4" />
+            卡密库存
+          </button>
+
+          <button
+            onClick={() => setCurrentView("import")}
+            className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              currentView === "import"
+                ? "bg-indigo-500/10 text-indigo-400"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
+          >
+            <Upload className="h-4 w-4" />
+            卡密导入
+          </button>
+
+          <button
+            onClick={() => setCurrentView("orders")}
+            className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              currentView === "orders"
+                ? "bg-indigo-500/10 text-indigo-400"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            订单列表
+          </button>
+
+          <button
+            onClick={() => setCurrentView("issue")}
+            className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              currentView === "issue"
+                ? "bg-indigo-500/10 text-indigo-400"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
+          >
+            <Send className="h-4 w-4" />
+            在线发放 CDK
+          </button>
+        </nav>
+      </aside>
+
+      {/* 右侧内容区 */}
+      <main className="flex-1 overflow-auto">
+        <div className="p-8">
+          {/* 顶部标题栏 */}
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">
+                {currentView === "dashboard" && "运营仪表盘"}
+                {currentView === "stock" && "卡密库存"}
+                {currentView === "import" && "卡密导入"}
+                {currentView === "orders" && "订单列表"}
+                {currentView === "issue" && "在线发放 CDK"}
+              </h1>
+              <p className="mt-1 text-sm text-slate-400">
+                {currentView === "dashboard" && "查看核心运营指标"}
+                {currentView === "stock" && "管理和查看卡密库存"}
+                {currentView === "import" && "批量导入充值卡密"}
+                {currentView === "orders" && "查看所有订单记录"}
+                {currentView === "issue" && "直接从卡台发放 CDK"}
+              </p>
+            </div>
+
+            <button
+              onClick={() => loadData()}
+              className="flex items-center gap-2 rounded-lg bg-slate-800/50 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700/50"
+            >
+              <RefreshCw className="h-4 w-4" />
+              刷新数据
+            </button>
+          </div>
+
+          {/* 仪表盘 */}
+          {currentView === "dashboard" && stats && (
+            <div className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">今日销售额</p>
+                      <p className="mt-2 text-3xl font-bold text-white">¥{stats.todayRevenue}</p>
+                    </div>
+                    <div className="rounded-lg bg-emerald-500/10 p-2">
+                      <BarChart3 className="h-5 w-5 text-emerald-400" />
+                    </div>
                   </div>
-                ))}
+                </div>
+
+                <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">累计销售额</p>
+                      <p className="mt-2 text-3xl font-bold text-white">¥{stats.totalRevenue}</p>
+                    </div>
+                    <div className="rounded-lg bg-indigo-500/10 p-2">
+                      <BarChart3 className="h-5 w-5 text-indigo-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm text-slate-400">已成交订单</p>
+                      <p className="mt-2 text-3xl font-bold text-white">{stats.paidOrders} / {stats.totalOrders}</p>
+                    </div>
+                    <div className="rounded-lg bg-violet-500/10 p-2">
+                      <Package className="h-5 w-5 text-violet-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+                <h2 className="mb-4 text-lg font-bold text-white">套餐库存</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between rounded-lg bg-slate-800/30 p-3">
+                    <span className="text-sm font-medium text-slate-300">ChatGPT Go</span>
+                    <span className="text-lg font-bold text-white">{stats.stockGo} 张</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-slate-800/30 p-3">
+                    <span className="text-sm font-medium text-slate-300">ChatGPT Plus</span>
+                    <span className="text-lg font-bold text-white">{stats.stockPlus} 张</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-slate-800/30 p-3">
+                    <span className="text-sm font-medium text-slate-300">Pro 5x</span>
+                    <span className="text-lg font-bold text-white">{stats.stockPro5x} 张</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-slate-800/30 p-3">
+                    <span className="text-sm font-medium text-slate-300">Pro 20x</span>
+                    <span className="text-lg font-bold text-white">{stats.stockPro20x} 张</span>
+                  </div>
+                  <div className="flex items-center justify-between rounded-lg bg-slate-800/30 p-3">
+                    <span className="text-sm font-medium text-slate-300">Pro 50x</span>
+                    <span className="text-lg font-bold text-white">{stats.stockPro50x} 张</span>
+                  </div>
+                </div>
               </div>
             </div>
           )}
-        </section>
+
+          {/* 卡密库存 */}
+          {currentView === "stock" && (
+            <div className="space-y-4">
+              {/* 状态切换标签 */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setStockFilter("unused")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    stockFilter === "unused"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
+                  }`}
+                >
+                  未使用 ({cards.filter(c => !c.is_used).length})
+                </button>
+                <button
+                  onClick={() => setStockFilter("used")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    stockFilter === "used"
+                      ? "bg-indigo-600 text-white"
+                      : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
+                  }`}
+                >
+                  已使用 ({cards.filter(c => c.is_used).length})
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="搜索卡密..."
+                    value={searchKey}
+                    onChange={(e) => setSearchKey(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-900/50">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-slate-700/50 bg-slate-800/30 text-xs uppercase text-slate-400">
+                      <tr>
+                        <th className="px-6 py-3">卡密内容</th>
+                        <th className="px-6 py-3">所属方案</th>
+                        <th className="px-6 py-3">状态</th>
+                        <th className="px-6 py-3">绑定订单</th>
+                        <th className="px-6 py-3">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50">
+                      {filteredCards.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-8 text-center text-slate-400">
+                            {searchKey ? "没有找到匹配的卡密" : "暂无数据"}
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredCards.map((card) => (
+                          <tr key={card.id} className="hover:bg-slate-800/20">
+                            <td className="px-6 py-4 font-mono text-xs text-white">{card.card_code}</td>
+                            <td className="px-6 py-4 text-slate-300">{planNames[card.plan_id]}</td>
+                            <td className="px-6 py-4">
+                              {card.is_used ? (
+                                <span className="inline-flex rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">
+                                  已使用
+                                </span>
+                              ) : (
+                                <span className="inline-flex rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-400">
+                                  待售出
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 font-mono text-xs text-slate-400">
+                              {card.order_id || "–"}
+                            </td>
+                            <td className="px-6 py-4">
+                              {!card.is_used && (
+                                <button
+                                  onClick={() => handleDelete(card.id)}
+                                  className="flex items-center gap-1 rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  删除
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 卡密导入 */}
+          {currentView === "import" && (
+            <div className="mx-auto max-w-2xl">
+              <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                    选择方案
+                  </label>
+                  <select
+                    value={importPlan}
+                    onChange={(e) => setImportPlan(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    <option value="go">ChatGPT Go</option>
+                    <option value="plus">ChatGPT Plus</option>
+                    <option value="pro_5x">Pro 5x</option>
+                    <option value="pro_20x">Pro 20x</option>
+                    <option value="pro_50x">Pro 50x</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                    卡密内容（一行一个）
+                  </label>
+                  <textarea
+                    value={importText}
+                    onChange={(e) => setImportText(e.target.value)}
+                    placeholder="EVER-8GRV-T77X-ZX5E&#x0A;EVER-AAAA-BBBB-CCCC"
+                    rows={10}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 font-mono text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+
+                <button
+                  onClick={handleImport}
+                  disabled={importing || !importText.trim()}
+                  className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {importing ? "导入中..." : "确认批量导入"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 订单列表 */}
+          {currentView === "orders" && (
+            <div className="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-900/50">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="border-b border-slate-700/50 bg-slate-800/30 text-xs uppercase text-slate-400">
+                    <tr>
+                      <th className="px-6 py-3">订单号 / 时间</th>
+                      <th className="px-6 py-3">手机号</th>
+                      <th className="px-6 py-3">购买方案</th>
+                      <th className="px-6 py-3">支付金额</th>
+                      <th className="px-6 py-3">支付状态</th>
+                      <th className="px-6 py-3">分配卡密</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-700/50">
+                    {orders.map((order) => (
+                      <tr key={order.order_id} className="hover:bg-slate-800/20">
+                        <td className="px-6 py-4">
+                          <div className="font-mono text-xs text-white">{order.order_id}</div>
+                          <div className="mt-1 text-xs text-slate-400">
+                            {new Date(order.created_at).toLocaleString("zh-CN")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-slate-300">{order.phone}</td>
+                        <td className="px-6 py-4 text-slate-300">{order.plan_name || order.plan_id}</td>
+                        <td className="px-6 py-4 font-semibold text-white">¥{order.money}</td>
+                        <td className="px-6 py-4">
+                          {order.status === "paid" ? (
+                            <span className="inline-flex rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">
+                              已支付
+                            </span>
+                          ) : (
+                            <span className="inline-flex rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-400">
+                              待支付
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 font-mono text-xs text-slate-400">
+                          {order.card_code || "–"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* 在线发放 CDK */}
+          {currentView === "issue" && (
+            <div className="mx-auto max-w-2xl space-y-6">
+              <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
+                <h2 className="mb-4 text-lg font-bold text-white">批量导入充值卡密</h2>
+
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                    套餐类型
+                  </label>
+                  <select
+                    value={issuePlan}
+                    onChange={(e) => setIssuePlan(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    <option value="go">ChatGPT Go</option>
+                    <option value="plus">ChatGPT Plus</option>
+                    <option value="pro_5x">Pro 5x</option>
+                    <option value="pro_20x">Pro 20x</option>
+                    <option value="pro_50x">Pro 50x</option>
+                  </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                    发放数量
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={issueCount}
+                    onChange={(e) => setIssueCount(Number(e.target.value))}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                    付款货币
+                  </label>
+                  <select
+                    value={issueCurrency}
+                    onChange={(e) => setIssueCurrency(e.target.value)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="CNY">CNY</option>
+                    <option value="PHP">PHP</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleIssueCdk}
+                  disabled={issuing}
+                  className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {issuing ? "发放中..." : "立即发放"}
+                </button>
+              </div>
+
+              {issuedCdks.length > 0 && (
+                <div className="rounded-xl border border-emerald-700/50 bg-emerald-900/20 p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-emerald-400">
+                      发放成功！共 {issuedCdks.length} 张
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={toggleSelectAllCdks}
+                        className="rounded-lg bg-slate-800/50 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700/50"
+                      >
+                        {selectedCdks.length === issuedCdks.length ? "取消全选" : "全选"}
+                      </button>
+                      <button
+                        onClick={handleImportIssuedCdks}
+                        disabled={selectedCdks.length === 0 || importing}
+                        className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-700 disabled:opacity-50"
+                      >
+                        {importing ? "导入中..." : `导入选中 (${selectedCdks.length})`}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {issuedCdks.map((cdk, index) => (
+                      <div
+                        key={index}
+                        onClick={() => toggleCdkSelection(cdk)}
+                        className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition ${
+                          selectedCdks.includes(cdk)
+                            ? "bg-indigo-600/20 ring-2 ring-indigo-500"
+                            : "bg-slate-800/50 hover:bg-slate-700/50"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedCdks.includes(cdk)}
+                          onChange={() => {}}
+                          className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+                        />
+                        <span className="flex-1 font-mono text-sm text-white">{cdk}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </main>
-    </div>
-  );
-}
-
-function CardStat({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div>
-        <div className="text-xs font-bold text-gray-400">{title}</div>
-        <div className="mt-1 text-2xl font-black text-gray-900">{value}</div>
-      </div>
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-50">
-        {icon}
-      </div>
-    </div>
-  );
-}
-
-function StockRow({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex justify-between">
-      <span>{label}</span>
-      <span className="font-mono font-bold text-indigo-600">{value} 张</span>
     </div>
   );
 }
