@@ -703,17 +703,46 @@ export default function AdminPage() {
 
                 <div className="mb-4">
                   <label className="mb-2 block text-sm font-medium text-slate-300">
-                    付款货币
+                    付款地区
                   </label>
                   <select
-                    value={issueCurrency}
-                    onChange={(e) => setIssueCurrency(e.target.value)}
+                    value={issueCountry}
+                    onChange={(e) => {
+                      setIssueCountry(e.target.value);
+                      // 自动设置对应货币
+                      const currencyMap: Record<string, string> = {
+                        US: "USD",
+                        JP: "JPY",
+                        PH: "PHP",
+                        CL: "CLP",
+                        EG: "EGP",
+                        NG: "NGN",
+                        TR: "TRY",
+                      };
+                      setIssueCurrency(currencyMap[e.target.value] || "USD");
+                    }}
                     className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                   >
-                    <option value="USD">USD</option>
-                    <option value="CNY">CNY</option>
-                    <option value="PHP">PHP</option>
+                    <option value="US">美国 (US)</option>
+                    <option value="JP">日本 (JP)</option>
+                    <option value="PH">菲律宾 (PH)</option>
+                    <option value="CL">智利 (CL)</option>
+                    <option value="EG">埃及 (EG)</option>
+                    <option value="NG">尼日利亚 (NG)</option>
+                    <option value="TR">土耳其 (TR)</option>
                   </select>
+                </div>
+
+                <div className="mb-4">
+                  <label className="mb-2 block text-sm font-medium text-slate-300">
+                    付款货币（自动）
+                  </label>
+                  <input
+                    type="text"
+                    value={issueCurrency}
+                    readOnly
+                    className="w-full rounded-lg border border-slate-700 bg-slate-800/30 px-4 py-2.5 text-slate-400 cursor-not-allowed"
+                  />
                 </div>
 
                 <button
