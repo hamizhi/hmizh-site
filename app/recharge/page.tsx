@@ -40,6 +40,13 @@ export default function RechargePage() {
         setOrderNo(data.order.orderId);
         setCard(data.order.cardCode);
         setCardStatus("valid");
+
+        // 触发 Google Ads 转化事件
+        if (typeof window !== "undefined" && "gtag" in window) {
+          (window as any).gtag("event", "conversion", {
+            send_to: "AW-18500682075",
+          });
+        }
       })
       .catch((reason: unknown) => {
         setError(reason instanceof Error ? reason.message : "订单查询失败");

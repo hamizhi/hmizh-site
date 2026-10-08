@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <LenisProvider>{children}</LenisProvider>
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=AW-18499359264"
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18500682075"
           strategy="afterInteractive"
         />
         <Script id="google-ads-tag" strategy="afterInteractive">
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'AW-18499359264');
+            gtag('config', 'AW-18500682075');
           `}
         </Script>
       </body>
