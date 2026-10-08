@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -88,6 +88,7 @@ export default function RedeemPage() {
   const [preflightToken, setPreflightToken] = useState("");
   const [orderId, setOrderId] = useState("");
   const clientRequestId = useRef("");
+  const autoRefreshInterval = useRef<NodeJS.Timeout | null>(null);
 
   const resetFromCode = () => {
     setState("idle");
@@ -101,6 +102,11 @@ export default function RedeemPage() {
     setOrderId("");
     setSession("");
     clientRequestId.current = "";
+    // 清除自动刷新定时器
+    if (autoRefreshInterval.current) {
+      clearInterval(autoRefreshInterval.current);
+      autoRefreshInterval.current = null;
+    }
   };
 
   const verifyCode = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -170,6 +176,48 @@ export default function RedeemPage() {
       if (initialOrder?.order_id) setOrderId(String(initialOrder.order_id));
 
       setState("polling");
+
+      // 启动自动刷新定时器
+      if (autoRefreshInterval.current) {
+        clearInterval(autoRefreshInterval.current);
+      }
+      autoRefreshInterval.current = setInterval(async () => {
+        try {
+          const result = await requestApi("/api/cdk/result", { redemptionToken });
+          const order = result.data?.order;
+          const status = order?.status || "";
+
+          if (status === "completed") {
+            setOrderId(order?.order_id ? String(order.order_id) : "");
+            setState("success");
+            setSession("");
+            if (autoRefreshInterval.current) {
+              clearInterval(autoRefreshInterval.current);
+              autoRefreshInterval.current = null;
+            }
+          } else if (status && !IN_PROGRESS.has(status)) {
+            if (autoRefreshInterval.current) {
+              clearInterval(autoRefreshInterval.current);
+              autoRefreshInterval.current = null;
+            }
+            setState("error");
+            setMessage(
+              status === "review"
+                ? "订单进入人工复核，请暂时不要重复兑换"
+                : `兑换未完成，当前状态：${status}`,
+            );
+          }
+        } catch (error) {
+          if (autoRefreshInterval.current) {
+            clearInterval(autoRefreshInterval.current);
+            autoRefreshInterval.current = null;
+          }
+          setState("error");
+          setMessage(error instanceof Error ? error.message : "兑换失败，请稍后重试");
+        }
+      }, 2000); // 每2秒刷新一次
+
+      // 初始检查（保留原有逻辑作为兜底）
       for (let attempt = 0; attempt < 40; attempt += 1) {
         await sleep(attempt === 0 ? 1000 : 3000);
         const result = await requestApi("/api/cdk/result", { redemptionToken });
@@ -180,10 +228,18 @@ export default function RedeemPage() {
           setOrderId(order?.order_id ? String(order.order_id) : "");
           setState("success");
           setSession("");
+          if (autoRefreshInterval.current) {
+            clearInterval(autoRefreshInterval.current);
+            autoRefreshInterval.current = null;
+          }
           return;
         }
 
         if (status && !IN_PROGRESS.has(status)) {
+          if (autoRefreshInterval.current) {
+            clearInterval(autoRefreshInterval.current);
+            autoRefreshInterval.current = null;
+          }
           throw new Error(
             status === "review"
               ? "订单进入人工复核，请暂时不要重复兑换"
@@ -192,8 +248,16 @@ export default function RedeemPage() {
         }
       }
 
+      if (autoRefreshInterval.current) {
+        clearInterval(autoRefreshInterval.current);
+        autoRefreshInterval.current = null;
+      }
       throw new Error("兑换仍在处理中，请稍后使用同一张卡密重新查询结果");
     } catch (error) {
+      if (autoRefreshInterval.current) {
+        clearInterval(autoRefreshInterval.current);
+        autoRefreshInterval.current = null;
+      }
       setState("error");
       setMessage(error instanceof Error ? error.message : "兑换失败，请稍后重试");
     }
@@ -211,26 +275,41 @@ export default function RedeemPage() {
               ? "兑换已受理，正在等待结果..."
               : "";
 
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (autoRefreshInterval.current) {
+        clearInterval(autoRefreshInterval.current);
+        autoRefreshInterval.current = null;
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-5">
           <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 font-bold text-white">G</span>
-            <span className="font-extrabold">GETGPT <span className="text-indigo-600">Pro</span></span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 font-bold text-white">C</span>
+            <span className="font-extrabold">ChatGPT <span className="text-indigo-600">Pro</span></span>
           </Link>
-          <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">返回首页</Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-sm text-slate-500 hover:text-slate-900">返回首页</Link>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-5 py-10 sm:py-16">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-            <KeyRound className="h-7 w-7" />
-          </div>
-          <h1 className="text-3xl font-black tracking-tight">卡密兑换</h1>
-          <p className="mt-2 text-sm text-slate-500">输入卡密和账号凭据，完成 Plus / Pro 兑换</p>
-        </div>
+      <main className="mx-auto max-w-7xl px-5 py-10 sm:py-16">
+        <div className="grid gap-6 lg:grid-cols-[1fr,380px]">
+          {/* 左侧主内容区 */}
+          <div>
+            <div className="mb-8 text-center lg:text-left">
+              <div className="mx-auto lg:mx-0 mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                <KeyRound className="h-7 w-7" />
+              </div>
+              <h1 className="text-3xl font-black tracking-tight">卡密兑换</h1>
+              <p className="mt-2 text-sm text-slate-500">输入卡密和账号凭据，完成 Plus / Pro 兑换</p>
+            </div>
 
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-6 flex items-center gap-3 text-sm font-bold">
@@ -403,7 +482,18 @@ export default function RedeemPage() {
           )}
 
           {busy && state !== "preflighting" && state !== "previewing" && (
-            <div className="mt-4 text-center text-xs text-slate-500">{stepText}</div>
+            <div className="mt-4 space-y-2">
+              <div className="text-center text-xs text-slate-500">{stepText}</div>
+              {state === "polling" && (
+                <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-2 text-sm font-bold text-blue-900">
+                    <LoaderCircle className="h-4 w-4 animate-spin text-blue-600" />
+                    <span>本页面每 2 秒自动刷新，无需手动刷新</span>
+                  </div>
+                  <div className="mt-1 text-xs text-blue-700">正在等待兑换完成，请勿关闭页面...</div>
+                </div>
+              )}
+            </div>
           )}
         </section>
 
@@ -420,10 +510,38 @@ export default function RedeemPage() {
           <section className="mt-6 rounded-3xl border border-rose-200 bg-rose-50 p-6">
             <div className="flex items-start gap-3 text-rose-900">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-              <div>
+              <div className="flex-1">
                 <h2 className="font-bold">兑换未完成</h2>
                 <p className="mt-1 text-sm leading-6">{message}</p>
                 {orderId && <p className="mt-2 font-mono text-xs">订单号：{orderId}</p>}
+
+                {/* Session 过期的特殊提示 */}
+                {(message.includes("Session") || message.includes("session") || message.includes("过期") || message.includes("无权访问")) && (
+                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <div className="text-sm font-bold text-amber-900 mb-2">🔄 解决方法：</div>
+                    <ol className="space-y-2 text-sm text-amber-900">
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold shrink-0">1.</span>
+                        <span>前往 <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-amber-950">chatgpt.com</a> 退出登录</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold shrink-0">2.</span>
+                        <span>重新登录您的 ChatGPT 账号</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold shrink-0">3.</span>
+                        <span>点击上方"<span className="font-bold">点我去获取充值信息</span>"按钮</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-bold shrink-0">4.</span>
+                        <span>复制新的充值信息，重新兑换</span>
+                      </li>
+                    </ol>
+                    <div className="mt-3 pt-3 border-t border-amber-300 text-xs text-amber-800">
+                      💡 提示：Session 信息有时效性，请确保使用最新获取的信息
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </section>
@@ -434,6 +552,53 @@ export default function RedeemPage() {
           <Info icon={<LockKeyhole className="h-4 w-4 text-indigo-600" />} title="凭据不落库" text="Session 不写入 Supabase" />
           <Info icon={<CheckCircle2 className="h-4 w-4 text-blue-600" />} title="异步确认" text="以最终订单状态为准" />
         </div>
+      </div>
+
+      {/* 右侧边栏 - 只在成功时显示 */}
+      {state === "success" && (
+        <div className="hidden lg:block">
+          <div className="sticky top-6">
+            <div className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 shadow-sm">
+              <div className="text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600">
+                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-black text-slate-900">🎁 续费专属优惠</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                  添加客服微信领取专属优惠资格
+                </p>
+                <div className="mt-4 space-y-2">
+                  <div className="rounded-xl bg-white/80 px-4 py-3 text-sm">
+                    <div className="font-bold text-indigo-600">ChatGPT Plus</div>
+                    <div className="text-2xl font-black text-indigo-700">¥139</div>
+                    <div className="text-xs text-slate-500">下次续费可享</div>
+                  </div>
+                  <div className="rounded-xl bg-white/80 px-4 py-3 text-sm">
+                    <div className="font-bold text-purple-600">Pro 用户</div>
+                    <div className="text-2xl font-black text-purple-700">立减 ¥20</div>
+                    <div className="text-xs text-slate-500">专属折扣</div>
+                  </div>
+                </div>
+                <a
+                  href="https://work.weixin.qq.com/kfid/kfc5d2ac29f3003753a"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3.5 text-sm font-bold text-white shadow-lg transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                  </svg>
+                  添加企业微信客服
+                </a>
+                <p className="mt-3 text-xs text-slate-500">客服在线时间：9:00 - 22:00</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
       </main>
     </div>
   );
