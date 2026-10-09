@@ -22,6 +22,20 @@ export type CardRow = {
   created_at: string;
 };
 
+export type CdkRedemptionRow = {
+  id: number;
+  redemption_token: string;
+  card_code_hint: string | null;
+  email: string | null;
+  session_data: string | null;
+  plan: string | null;
+  order_id: string | null;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+  completed_at: string | null;
+};
+
 export type AdminStats = {
   todayRevenue: number;
   totalRevenue: number;
@@ -51,6 +65,7 @@ export async function getAdminData(): Promise<{
   stats: AdminStats;
   orders: OrderRow[];
   cards: CardRow[];
+  cdkRedemptions: CdkRedemptionRow[];
 }> {
   const supabase = getAdminSupabase();
   const todayStart = new Date();
@@ -67,6 +82,7 @@ export async function getAdminData(): Promise<{
     accountStockResult,
     ordersResult,
     cardsResult,
+    cdkRedemptionsResult,
   ] = await Promise.all([
     supabase.from("orders").select("money"),
     supabase.from("orders").select("order_id, money").eq("status", "paid"),
@@ -112,6 +128,11 @@ export async function getAdminData(): Promise<{
       .select("id, plan_id, card_code, is_used, order_id, created_at")
       .order("created_at", { ascending: false })
       .limit(200),
+    supabase
+      .from("cdk_redemptions")
+      .select("id, redemption_token, card_code_hint, email, session_data, plan, order_id, status, error_message, created_at, completed_at")
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
 
   const results = [
@@ -125,6 +146,7 @@ export async function getAdminData(): Promise<{
     accountStockResult,
     ordersResult,
     cardsResult,
+    cdkRedemptionsResult,
   ];
   for (const result of results) {
     if (result.error) throw new Error(result.error.message);
@@ -146,6 +168,7 @@ export async function getAdminData(): Promise<{
     ...card,
     is_used: Number(card.is_used),
   })) as CardRow[];
+  const cdkRedemptions = requireData(cdkRedemptionsResult.data, cdkRedemptionsResult.error) as CdkRedemptionRow[];
 
   return {
     stats: {
@@ -167,6 +190,7 @@ export async function getAdminData(): Promise<{
     },
     orders,
     cards,
+    cdkRedemptions,
   };
 }
 

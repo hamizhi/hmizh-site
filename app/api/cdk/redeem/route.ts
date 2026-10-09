@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { attachDeviceCookie, callZovoCard } from "@/lib/cdk/zovocard";
+import { getAdminSupabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -34,6 +35,27 @@ export async function POST(request: Request) {
         client_request_id: clientRequestId,
       },
     });
+
+    // 兑换请求已提交，更新数据库状态
+    if (result.response.status === 200) {
+      try {
+        const responseData = await result.response.json();
+        const orderId = responseData.data?.order?.order_id;
+
+        const supabase = getAdminSupabase();
+        await supabase
+          .from("cdk_redemptions")
+          .update({
+            order_id: orderId || null,
+            status: "completed",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("redemption_token", redemptionToken);
+      } catch (dbError) {
+        console.error("更新兑换记录失败:", dbError);
+      }
+    }
+
     return attachDeviceCookie(result.response, result.device);
   } catch {
     return NextResponse.json(

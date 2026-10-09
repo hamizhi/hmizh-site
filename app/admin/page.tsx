@@ -44,15 +44,30 @@ type Card = {
   order_id: string | null;
 };
 
+type CdkRedemption = {
+  id: number;
+  redemption_token: string;
+  card_code_hint: string | null;
+  email: string | null;
+  session_data: string | null;
+  plan: string | null;
+  order_id: string | null;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+  completed_at: string | null;
+};
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isAuthed, setIsAuthed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [currentView, setCurrentView] = useState<"dashboard" | "stock" | "import" | "orders" | "issue">("dashboard");
+  const [currentView, setCurrentView] = useState<"dashboard" | "stock" | "import" | "orders" | "issue" | "redemptions">("dashboard");
 
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cards, setCards] = useState<Card[]>([]);
+  const [cdkRedemptions, setCdkRedemptions] = useState<CdkRedemption[]>([]);
   const [searchKey, setSearchKey] = useState("");
   const [stockFilter, setStockFilter] = useState<"unused" | "used">("unused");
 
@@ -89,6 +104,7 @@ export default function AdminPage() {
       setStats(data.stats);
       setOrders(data.orders);
       setCards(data.cards);
+      setCdkRedemptions(data.cdkRedemptions || []);
     } catch {
       alert("网络连接异常");
     } finally {
@@ -368,6 +384,18 @@ export default function AdminPage() {
             <Send className="h-4 w-4" />
             在线发放 CDK
           </button>
+
+          <button
+            onClick={() => setCurrentView("redemptions")}
+            className={`mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+              currentView === "redemptions"
+                ? "bg-indigo-500/10 text-indigo-400"
+                : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            CDK 兑换记录
+          </button>
         </nav>
       </aside>
 
@@ -383,6 +411,7 @@ export default function AdminPage() {
                 {currentView === "import" && "卡密导入"}
                 {currentView === "orders" && "订单列表"}
                 {currentView === "issue" && "在线发放 CDK"}
+                {currentView === "redemptions" && "CDK 兑换记录"}
               </h1>
               <p className="mt-1 text-sm text-slate-400">
                 {currentView === "dashboard" && "查看核心运营指标"}
@@ -390,6 +419,7 @@ export default function AdminPage() {
                 {currentView === "import" && "批量导入充值卡密"}
                 {currentView === "orders" && "查看所有订单记录"}
                 {currentView === "issue" && "直接从卡台发放 CDK"}
+                {currentView === "redemptions" && "查看用户 CDK 兑换详情"}
               </p>
             </div>
 
@@ -799,6 +829,106 @@ export default function AdminPage() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* CDK 兑换记录 */}
+          {currentView === "redemptions" && (
+            <div className="rounded-xl border border-slate-700/50 bg-slate-900/50">
+              <div className="border-b border-slate-700/50 p-4">
+                <input
+                  type="text"
+                  placeholder="搜索邮箱、订单号、Token..."
+                  value={searchKey}
+                  onChange={(e) => setSearchKey(e.target.value)}
+                  className="w-full max-w-md rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                />
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-700/50 text-slate-400">
+                      <th className="px-4 py-3 font-medium">兑换时间</th>
+                      <th className="px-4 py-3 font-medium">邮箱</th>
+                      <th className="px-4 py-3 font-medium">套餐</th>
+                      <th className="px-4 py-3 font-medium">状态</th>
+                      <th className="px-4 py-3 font-medium">订单号</th>
+                      <th className="px-4 py-3 font-medium">Session</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cdkRedemptions
+                      .filter(
+                        (r) =>
+                          !searchKey ||
+                          r.email?.toLowerCase().includes(searchKey.toLowerCase()) ||
+                          r.order_id?.toLowerCase().includes(searchKey.toLowerCase()) ||
+                          r.redemption_token?.toLowerCase().includes(searchKey.toLowerCase())
+                      )
+                      .map((redemption) => (
+                        <tr key={redemption.id} className="border-b border-slate-800/50 hover:bg-slate-800/30">
+                          <td className="px-4 py-3 text-slate-300">
+                            {new Date(redemption.created_at).toLocaleString("zh-CN")}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-mono text-xs text-white">{redemption.email || "-"}</span>
+                          </td>
+                          <td className="px-4 py-3 text-slate-300">{redemption.plan || "-"}</td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-block rounded px-2 py-1 text-xs font-semibold ${
+                                redemption.status === "completed"
+                                  ? "bg-emerald-500/10 text-emerald-400"
+                                  : redemption.status === "failed"
+                                    ? "bg-red-500/10 text-red-400"
+                                    : "bg-amber-500/10 text-amber-400"
+                              }`}
+                            >
+                              {redemption.status === "completed"
+                                ? "已完成"
+                                : redemption.status === "failed"
+                                  ? "失败"
+                                  : "进行中"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="font-mono text-xs text-slate-400">
+                              {redemption.order_id || "-"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {redemption.session_data ? (
+                              <button
+                                onClick={() => {
+                                  navigator.clipboard.writeText(redemption.session_data || "");
+                                  alert("Session 已复制到剪贴板");
+                                }}
+                                className="rounded bg-indigo-600/20 px-2 py-1 text-xs text-indigo-400 hover:bg-indigo-600/30"
+                              >
+                                复制 Session
+                              </button>
+                            ) : (
+                              <span className="text-slate-500">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+
+                {cdkRedemptions.filter(
+                  (r) =>
+                    !searchKey ||
+                    r.email?.toLowerCase().includes(searchKey.toLowerCase()) ||
+                    r.order_id?.toLowerCase().includes(searchKey.toLowerCase()) ||
+                    r.redemption_token?.toLowerCase().includes(searchKey.toLowerCase())
+                ).length === 0 && (
+                  <div className="py-12 text-center text-slate-500">
+                    {searchKey ? "没有找到匹配的兑换记录" : "暂无兑换记录"}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
