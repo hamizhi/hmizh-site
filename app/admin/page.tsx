@@ -40,10 +40,11 @@ type Card = {
   id: number;
   plan_id: string;
   card_code: string;
-  is_used: number;
+  status: string;
   order_id: string | null;
   import_source?: 'manual' | 'auto';
   is_redeemed?: number;
+  used_at?: string | null;
 };
 
 type CdkRedemption = {
@@ -367,14 +368,14 @@ export default function AdminPage() {
     // 主筛选：未售出 vs 已售出
     let matchesStatus = false;
     if (stockFilter === "unsold") {
-      matchesStatus = !c.is_used;
+      matchesStatus = c.status === 'unused';
       // 未售出子筛选
       if (matchesStatus && unsoldSubFilter !== "all") {
         const source = c.import_source || 'manual';
         matchesStatus = source === unsoldSubFilter;
       }
     } else {
-      matchesStatus = c.is_used === 1;
+      matchesStatus = c.status === 'used';
       // 已售出子筛选
       if (matchesStatus && soldSubFilter !== "all") {
         if (soldSubFilter === "unredeemed") {
@@ -597,7 +598,7 @@ export default function AdminPage() {
                       : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
                   }`}
                 >
-                  未售出 ({cards.filter(c => !c.is_used).length})
+                  未售出 ({cards.filter(c => c.status === 'unused').length})
                 </button>
                 <button
                   onClick={() => {
@@ -610,7 +611,7 @@ export default function AdminPage() {
                       : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
                   }`}
                 >
-                  已售出 ({cards.filter(c => c.is_used).length})
+                  已售出 ({cards.filter(c => c.status === 'used').length})
                 </button>
               </div>
 
@@ -723,7 +724,7 @@ export default function AdminPage() {
                             <td className="px-6 py-4 font-mono text-xs text-white">{card.card_code}</td>
                             <td className="px-6 py-4 text-slate-300">{planNames[card.plan_id]}</td>
                             <td className="px-6 py-4">
-                              {card.is_used ? (
+                              {card.status === 'used' ? (
                                 // 已售出
                                 (card.is_redeemed || 0) === 1 ? (
                                   <span className="inline-flex rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">
@@ -745,7 +746,7 @@ export default function AdminPage() {
                               {card.order_id || "–"}
                             </td>
                             <td className="px-6 py-4">
-                              {!card.is_used && (
+                              {card.status === 'unused' && (
                                 <button
                                   onClick={() => handleDelete(card.id)}
                                   className="flex items-center gap-1 rounded-lg bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20"

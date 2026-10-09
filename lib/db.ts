@@ -17,8 +17,11 @@ export type CardRow = {
   id: number;
   plan_id: string;
   card_code: string;
-  is_used: number;
+  status: string;
   order_id: string | null;
+  import_source?: string;
+  is_redeemed?: number;
+  used_at?: string | null;
   created_at: string;
 };
 
@@ -95,27 +98,27 @@ export async function getAdminData(): Promise<{
       .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "pro-5x")
-      .eq("is_used", 0),
+      .eq("status", "unused"),
     supabase
       .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "go")
-      .eq("is_used", 0),
+      .eq("status", "unused"),
     supabase
       .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "plus")
-      .eq("is_used", 0),
+      .eq("status", "unused"),
     supabase
       .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "pro")
-      .eq("is_used", 0),
+      .eq("status", "unused"),
     supabase
       .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "account")
-      .eq("is_used", 0),
+      .eq("status", "unused"),
     supabase
       .from("orders")
       .select(
@@ -125,7 +128,7 @@ export async function getAdminData(): Promise<{
       .limit(100),
     supabase
       .from("card_keys")
-      .select("id, plan_id, card_code, is_used, order_id, import_source, is_redeemed, created_at")
+      .select("id, plan_id, card_code, status, order_id, import_source, is_redeemed, used_at, created_at")
       .order("created_at", { ascending: false })
       .limit(200),
     supabase
@@ -166,7 +169,7 @@ export async function getAdminData(): Promise<{
   ) as OrderRow[];
   const cards = requireData(cardsResult.data, cardsResult.error).map((card) => ({
     ...card,
-    is_used: Number(card.is_used),
+    is_redeemed: card.is_redeemed || 0,
   })) as CardRow[];
   const cdkRedemptions = requireData(cdkRedemptionsResult.data, cdkRedemptionsResult.error) as CdkRedemptionRow[];
 
@@ -207,7 +210,7 @@ export async function importCards(
       uniqueCodes.map((cardCode) => ({
         plan_id: planId,
         card_code: cardCode,
-        is_used: 0,
+        status: 'unused',
         import_source: importSource,
       })),
       { onConflict: "card_code", ignoreDuplicates: true },
@@ -279,7 +282,7 @@ export async function deleteUnusedCard(cardId: number): Promise<void> {
     .from("card_keys")
     .delete()
     .eq("id", cardId)
-    .eq("is_used", 0);
+    .eq("status", "unused");
 
   if (error) throw new Error(error.message);
 }
