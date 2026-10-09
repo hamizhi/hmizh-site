@@ -583,9 +583,12 @@ export default function Home() {
             <p className="text-slate-400 text-lg">
               所有套餐均享 100% 充值失败退款保障
             </p>
-            <p className="text-amber-400 text-base font-bold mt-3 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-2 inline-block">
-              ⚠️ 由于官方原因 20倍已改为10倍并上线25倍
-            </p>
+            <div className="mt-4 inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl px-5 py-3 shadow-lg shadow-amber-500/10">
+              <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+              <p className="text-amber-400 text-sm font-bold">
+                由于官方原因 Pro 系列 20倍已改为10倍并上线25倍
+              </p>
+            </div>
           </div>
 
           <div className="grid items-stretch gap-6 md:grid-cols-3">

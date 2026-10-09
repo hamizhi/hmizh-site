@@ -50,7 +50,7 @@ export type AdminStats = {
 
 export type CreateOrderInput = {
   email: string;
-  planId: "go" | "plus" | "pro-5x" | "pro" | "account";
+  planId: "go" | "plus" | "pro-5x" | "pro-10x" | "pro-25x" | "pro" | "account";
   planName: string;
   money: number;
 };
