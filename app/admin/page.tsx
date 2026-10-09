@@ -72,13 +72,19 @@ export default function AdminPage() {
   const [stockFilter, setStockFilter] = useState<"unused" | "used">("unused");
 
   // CDK 发码相关状态
-  const [issuePlan, setIssuePlan] = useState("plus");
-  const [issueCount, setIssueCount] = useState(1);
+  const [selectedPlans, setSelectedPlans] = useState<string[]>(["plus"]); // 改为数组支持多选
+  const [planCounts, setPlanCounts] = useState<Record<string, number>>({
+    go: 1,
+    plus: 1,
+    "pro-5x": 1,
+    pro: 1,
+  }); // 每个套餐的数量
   const [issueCountry, setIssueCountry] = useState("US");
   const [issueCurrency, setIssueCurrency] = useState("USD");
   const [issuing, setIssuing] = useState(false);
   const [issuedCdks, setIssuedCdks] = useState<string[]>([]);
   const [selectedCdks, setSelectedCdks] = useState<string[]>([]);
+  const [devMode, setDevMode] = useState(false); // 开发模式
 
   const [importPlan, setImportPlan] = useState("plus");
   const [importText, setImportText] = useState("");
@@ -166,12 +172,36 @@ export default function AdminPage() {
   };
 
   const handleIssueCdk = async () => {
-    if (issueCount < 1 || issueCount > 100) {
-      alert("发放数量必须在 1-100 之间");
+    if (selectedPlans.length === 0) {
+      alert("请至少选择一个套餐");
       return;
     }
 
-    if (!confirm(`确认发放 ${issueCount} 张 ${issuePlan} CDK？\n地区: ${issueCountry}/${issueCurrency}`)) {
+    // 开发模式：直接生成模拟 CDK
+    if (devMode) {
+      const mockCdks: string[] = [];
+      for (const plan of selectedPlans) {
+        const count = planCounts[plan] || 1;
+        for (let i = 0; i < count; i++) {
+          mockCdks.push(`DEV-${plan.toUpperCase()}-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
+        }
+      }
+      setIssuedCdks(mockCdks);
+      setSelectedCdks([]);
+      alert(`开发模式：成功生成 ${mockCdks.length} 张模拟 CDK！`);
+      return;
+    }
+
+    // 计算总数量
+    const totalCount = selectedPlans.reduce((sum, plan) => sum + (planCounts[plan] || 1), 0);
+
+    if (totalCount > 100) {
+      alert("总发放数量不能超过 100 张");
+      return;
+    }
+
+    const planList = selectedPlans.map(plan => `${planNames[plan] || plan}: ${planCounts[plan] || 1}张`).join("\n");
+    if (!confirm(`确认发放以下 CDK？\n\n${planList}\n\n总计: ${totalCount} 张\n地区: ${issueCountry}/${issueCurrency}`)) {
       return;
     }
 
@@ -179,27 +209,36 @@ export default function AdminPage() {
     setIssuedCdks([]);
 
     try {
-      const response = await fetch("/api/admin/issue-cdk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          plan: issuePlan,
-          count: issueCount,
-          paymentCountry: issueCountry,
-          paymentCurrency: issueCurrency,
-        }),
-      });
+      // 批量发放多个套餐
+      const allCdks: string[] = [];
 
-      const data = await response.json();
+      for (const plan of selectedPlans) {
+        const count = planCounts[plan] || 1;
 
-      if (!data.success) {
-        alert(`发码失败: ${data.error || "未知错误"}`);
-        return;
+        const response = await fetch("/api/admin/issue-cdk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            plan: plan,
+            count: count,
+            paymentCountry: issueCountry,
+            paymentCurrency: issueCurrency,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+          alert(`发码失败 (${plan}): ${data.error || "未知错误"}`);
+          continue;
+        }
+
+        allCdks.push(...(data.cdks || []));
       }
 
-      setIssuedCdks(data.cdks || []);
+      setIssuedCdks(allCdks);
       setSelectedCdks([]); // 重置选择
-      alert(`成功发放 ${data.cdks?.length || 0} 张 CDK！`);
+      alert(`成功发放 ${allCdks.length} 张 CDK！`);
 
       await loadData();
     } catch (error) {
@@ -224,7 +263,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           action: "import_cards",
           password,
-          planId: issuePlan,
+          planId: selectedPlans[0] || "plus", // 使用第一个选中的套餐
           cardCodes: selectedCdks.join("\n"),
         }),
       });
@@ -256,6 +295,19 @@ export default function AdminPage() {
     } else {
       setSelectedCdks([...issuedCdks]);
     }
+  };
+
+  const togglePlanSelection = (plan: string) => {
+    setSelectedPlans(prev =>
+      prev.includes(plan) ? prev.filter(p => p !== plan) : [...prev, plan]
+    );
+  };
+
+  const updatePlanCount = (plan: string, count: number) => {
+    setPlanCounts(prev => ({
+      ...prev,
+      [plan]: Math.max(1, Math.min(100, count))
+    }));
   };
 
   if (!isAuthed) {
@@ -297,6 +349,8 @@ export default function AdminPage() {
   const planNames: Record<string, string> = {
     go: "ChatGPT Go",
     plus: "ChatGPT Plus",
+    "pro-5x": "Pro 5x",
+    pro: "Pro",
     pro_5x: "Pro 5x",
     pro_20x: "Pro 20x",
     pro_50x: "Pro 50x",
@@ -698,39 +752,102 @@ export default function AdminPage() {
           {currentView === "issue" && (
             <div className="mx-auto max-w-2xl space-y-6">
               <div className="rounded-xl border border-slate-700/50 bg-slate-900/50 p-6">
-                <h2 className="mb-4 text-lg font-bold text-white">批量导入充值卡密</h2>
-
-                <div className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    套餐类型
-                  </label>
-                  <select
-                    value={issuePlan}
-                    onChange={(e) => setIssuePlan(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-lg font-bold text-white">批量发放 CDK</h2>
+                  <button
+                    onClick={() => setDevMode(!devMode)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
+                      devMode
+                        ? "bg-amber-500 text-white"
+                        : "bg-slate-700/50 text-slate-400 hover:bg-slate-700"
+                    }`}
                   >
-                    <option value="go">ChatGPT Go</option>
-                    <option value="plus">ChatGPT Plus</option>
-                    <option value="pro_5x">Pro 5x</option>
-                    <option value="pro_20x">Pro 20x</option>
-                    <option value="pro_50x">Pro 50x</option>
-                  </select>
+                    {devMode ? "🔧 开发模式" : "开发模式"}
+                  </button>
                 </div>
 
-                <div className="mb-4">
-                  <label className="mb-2 block text-sm font-medium text-slate-300">
-                    发放数量
+                {devMode && (
+                  <div className="mb-4 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-amber-400">
+                    ⚠️ 开发模式：将生成模拟 CDK，不会调用真实接口
+                  </div>
+                )}
+
+                {/* 第一行：套餐类型（圆形多选） */}
+                <div className="mb-6">
+                  <label className="mb-3 block text-sm font-medium text-slate-300">
+                    套餐类型（可多选）
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={issueCount}
-                    onChange={(e) => setIssueCount(Number(e.target.value))}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                  />
+                  <div className="flex flex-wrap gap-4">
+                    {[
+                      { id: "go", name: "Go", color: "emerald" },
+                      { id: "plus", name: "Plus", color: "blue" },
+                      { id: "pro-5x", name: "Pro 5x", color: "purple" },
+                      { id: "pro", name: "Pro", color: "rose" },
+                    ].map((plan) => (
+                      <button
+                        key={plan.id}
+                        onClick={() => togglePlanSelection(plan.id)}
+                        className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+                          selectedPlans.includes(plan.id)
+                            ? `bg-${plan.color}-500/20 text-${plan.color}-400 ring-2 ring-${plan.color}-500`
+                            : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50"
+                        }`}
+                      >
+                        <div
+                          className={`h-4 w-4 rounded-full border-2 transition ${
+                            selectedPlans.includes(plan.id)
+                              ? `border-${plan.color}-500 bg-${plan.color}-500`
+                              : "border-slate-600"
+                          }`}
+                        >
+                          {selectedPlans.includes(plan.id) && (
+                            <div className="flex h-full items-center justify-center text-white text-xs">✓</div>
+                          )}
+                        </div>
+                        {plan.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
+                {/* 第二行：每个已选套餐的数量输入 */}
+                {selectedPlans.length > 0 && (
+                  <div className="mb-6 space-y-3">
+                    <label className="block text-sm font-medium text-slate-300">
+                      发放数量
+                    </label>
+                    {selectedPlans.map((planId) => {
+                      const planInfo = {
+                        go: { name: "ChatGPT Go", color: "emerald" },
+                        plus: { name: "ChatGPT Plus", color: "blue" },
+                        "pro-5x": { name: "Pro 5x", color: "purple" },
+                        pro: { name: "Pro", color: "rose" },
+                      }[planId];
+
+                      return (
+                        <div key={planId} className="flex items-center gap-3">
+                          <div className={`w-24 rounded-lg bg-${planInfo?.color}-500/10 px-3 py-2 text-center text-sm font-medium text-${planInfo?.color}-400`}>
+                            {planInfo?.name}
+                          </div>
+                          <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={planCounts[planId] || 1}
+                            onChange={(e) => updatePlanCount(planId, Number(e.target.value))}
+                            className="w-32 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-2 text-center text-white focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                          />
+                          <span className="text-sm text-slate-400">张</span>
+                        </div>
+                      );
+                    })}
+                    <div className="rounded-lg bg-indigo-500/10 px-3 py-2 text-sm text-indigo-400">
+                      总计：{selectedPlans.reduce((sum, plan) => sum + (planCounts[plan] || 1), 0)} 张
+                    </div>
+                  </div>
+                )}
+
+                {/* 付款地区 */}
                 <div className="mb-4">
                   <label className="mb-2 block text-sm font-medium text-slate-300">
                     付款地区
