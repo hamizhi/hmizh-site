@@ -20,6 +20,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           src="https://www.googletagmanager.com/gtag/js?id=AW-18500682075"
           strategy="afterInteractive"
         />
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-18503715952"
+          strategy="afterInteractive"
+        />
         <Script id="google-ads-tag" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
