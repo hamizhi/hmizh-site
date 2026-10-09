@@ -16,10 +16,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script
           async
-          src="https://www.googletagmanager.com/gtag/js?id=AW-18500682075"
-        />
-        <script
-          async
           src="https://www.googletagmanager.com/gtag/js?id=AW-18503715952"
         />
         <script
@@ -28,8 +24,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'AW-18500682075');
               gtag('config', 'AW-18503715952');
+              gtag('config', 'AW-18500682075');
             `,
           }}
         />
