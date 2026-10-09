@@ -42,6 +42,8 @@ type Card = {
   card_code: string;
   is_used: number;
   order_id: string | null;
+  import_source?: 'manual' | 'auto';
+  is_redeemed?: number;
 };
 
 type CdkRedemption = {
@@ -69,7 +71,9 @@ export default function AdminPage() {
   const [cards, setCards] = useState<Card[]>([]);
   const [cdkRedemptions, setCdkRedemptions] = useState<CdkRedemption[]>([]);
   const [searchKey, setSearchKey] = useState("");
-  const [stockFilter, setStockFilter] = useState<"unused" | "used">("unused");
+  const [stockFilter, setStockFilter] = useState<"unsold" | "sold">("unsold");
+  const [unsoldSubFilter, setUnsoldSubFilter] = useState<"all" | "manual" | "auto">("all");
+  const [soldSubFilter, setSoldSubFilter] = useState<"all" | "unredeemed" | "redeemed">("all");
 
   // CDK 发码相关状态
   const [selectedPlans, setSelectedPlans] = useState<string[]>(["plus"]); // 改为数组支持多选
@@ -265,6 +269,7 @@ export default function AdminPage() {
           password,
           planId: selectedPlans[0] || "plus", // 使用第一个选中的套餐
           cardCodes: selectedCdks.join("\n"),
+          importSource: "auto", // 标记为自动导入
         }),
       });
       const data = await response.json();
@@ -358,7 +363,28 @@ export default function AdminPage() {
 
   const filteredCards = cards.filter((c) => {
     const matchesSearch = c.card_code.toLowerCase().includes(searchKey.toLowerCase());
-    const matchesStatus = stockFilter === "unused" ? !c.is_used : c.is_used;
+
+    // 主筛选：未售出 vs 已售出
+    let matchesStatus = false;
+    if (stockFilter === "unsold") {
+      matchesStatus = !c.is_used;
+      // 未售出子筛选
+      if (matchesStatus && unsoldSubFilter !== "all") {
+        const source = c.import_source || 'manual';
+        matchesStatus = source === unsoldSubFilter;
+      }
+    } else {
+      matchesStatus = c.is_used === 1;
+      // 已售出子筛选
+      if (matchesStatus && soldSubFilter !== "all") {
+        if (soldSubFilter === "unredeemed") {
+          matchesStatus = (c.is_redeemed || 0) === 0;
+        } else {
+          matchesStatus = (c.is_redeemed || 0) === 1;
+        }
+      }
+    }
+
     return matchesSearch && matchesStatus;
   });
 
@@ -561,26 +587,103 @@ export default function AdminPage() {
               {/* 状态切换标签 */}
               <div className="flex gap-2">
                 <button
-                  onClick={() => setStockFilter("unused")}
+                  onClick={() => {
+                    setStockFilter("unsold");
+                    setUnsoldSubFilter("all");
+                  }}
                   className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    stockFilter === "unused"
+                    stockFilter === "unsold"
                       ? "bg-indigo-600 text-white"
                       : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
                   }`}
                 >
-                  未使用 ({cards.filter(c => !c.is_used).length})
+                  未售出 ({cards.filter(c => !c.is_used).length})
                 </button>
                 <button
-                  onClick={() => setStockFilter("used")}
+                  onClick={() => {
+                    setStockFilter("sold");
+                    setSoldSubFilter("all");
+                  }}
                   className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-                    stockFilter === "used"
+                    stockFilter === "sold"
                       ? "bg-indigo-600 text-white"
                       : "bg-slate-800/50 text-slate-400 hover:bg-slate-700/50 hover:text-white"
                   }`}
                 >
-                  已使用 ({cards.filter(c => c.is_used).length})
+                  已售出 ({cards.filter(c => c.is_used).length})
                 </button>
               </div>
+
+              {/* 子筛选 */}
+              {stockFilter === "unsold" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setUnsoldSubFilter("all")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      unsoldSubFilter === "all"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "bg-slate-800/30 text-slate-400 hover:bg-slate-700/30 hover:text-white"
+                    }`}
+                  >
+                    全部
+                  </button>
+                  <button
+                    onClick={() => setUnsoldSubFilter("manual")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      unsoldSubFilter === "manual"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "bg-slate-800/30 text-slate-400 hover:bg-slate-700/30 hover:text-white"
+                    }`}
+                  >
+                    手动导入
+                  </button>
+                  <button
+                    onClick={() => setUnsoldSubFilter("auto")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      unsoldSubFilter === "auto"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "bg-slate-800/30 text-slate-400 hover:bg-slate-700/30 hover:text-white"
+                    }`}
+                  >
+                    自动导入
+                  </button>
+                </div>
+              )}
+
+              {stockFilter === "sold" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSoldSubFilter("all")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      soldSubFilter === "all"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "bg-slate-800/30 text-slate-400 hover:bg-slate-700/30 hover:text-white"
+                    }`}
+                  >
+                    全部
+                  </button>
+                  <button
+                    onClick={() => setSoldSubFilter("unredeemed")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      soldSubFilter === "unredeemed"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "bg-slate-800/30 text-slate-400 hover:bg-slate-700/30 hover:text-white"
+                    }`}
+                  >
+                    未兑换
+                  </button>
+                  <button
+                    onClick={() => setSoldSubFilter("redeemed")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                      soldSubFilter === "redeemed"
+                        ? "bg-indigo-500/20 text-indigo-300"
+                        : "bg-slate-800/30 text-slate-400 hover:bg-slate-700/30 hover:text-white"
+                    }`}
+                  >
+                    已兑换
+                  </button>
+                </div>
+              )}
 
               <div className="flex gap-3">
                 <div className="relative flex-1">
@@ -621,12 +724,20 @@ export default function AdminPage() {
                             <td className="px-6 py-4 text-slate-300">{planNames[card.plan_id]}</td>
                             <td className="px-6 py-4">
                               {card.is_used ? (
-                                <span className="inline-flex rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">
-                                  已使用
-                                </span>
+                                // 已售出
+                                (card.is_redeemed || 0) === 1 ? (
+                                  <span className="inline-flex rounded-full bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400">
+                                    已售出已兑换
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex rounded-full bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-400">
+                                    已售出未兑换
+                                  </span>
+                                )
                               ) : (
+                                // 未售出
                                 <span className="inline-flex rounded-full bg-amber-500/10 px-2 py-1 text-xs font-semibold text-amber-400">
-                                  待售出
+                                  未售出
                                 </span>
                               )}
                             </td>

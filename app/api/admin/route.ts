@@ -55,7 +55,9 @@ export async function POST(req: Request) {
         .map((cardCode) => cardCode.trim())
         .filter(Boolean);
 
-      const count = await importCards(body.planId, list);
+      // 从请求中获取导入来源，默认为 manual
+      const importSource = body.importSource === 'auto' ? 'auto' : 'manual';
+      const count = await importCards(body.planId, list, importSource);
 
       return NextResponse.json({
         success: true,

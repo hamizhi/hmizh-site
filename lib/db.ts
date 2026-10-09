@@ -125,7 +125,7 @@ export async function getAdminData(): Promise<{
       .limit(100),
     supabase
       .from("cards")
-      .select("id, plan_id, card_code, is_used, order_id, created_at")
+      .select("id, plan_id, card_code, is_used, order_id, import_source, is_redeemed, created_at")
       .order("created_at", { ascending: false })
       .limit(200),
     supabase
@@ -197,6 +197,7 @@ export async function getAdminData(): Promise<{
 export async function importCards(
   planId: string,
   cardCodes: string[],
+  importSource: 'manual' | 'auto' = 'manual',
 ): Promise<number> {
   const supabase = getAdminSupabase();
   const uniqueCodes = [...new Set(cardCodes)];
@@ -207,6 +208,7 @@ export async function importCards(
         plan_id: planId,
         card_code: cardCode,
         is_used: 0,
+        import_source: importSource,
       })),
       { onConflict: "card_code", ignoreDuplicates: true },
     )
