@@ -433,7 +433,7 @@ export default function RedeemPage() {
                 </div>
                 <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
                   <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
-                  Session 只用于验证账号和兑换，不保存到数据库，也不会放入 URL。
+                  Session 用于验证账号和兑换，不会放入 URL，仅用于兑换流程。
                 </div>
                 <button
                   type="submit"
@@ -549,7 +549,7 @@ export default function RedeemPage() {
 
         <div className="mt-8 grid gap-3 text-xs text-slate-500 sm:grid-cols-3">
           <Info icon={<ShieldCheck className="h-4 w-4 text-emerald-600" />} title="服务端处理" text="密钥不进入浏览器" />
-          <Info icon={<LockKeyhole className="h-4 w-4 text-indigo-600" />} title="凭据不落库" text="Session 不写入 Supabase" />
+          <Info icon={<LockKeyhole className="h-4 w-4 text-indigo-600" />} title="安全传输" text="采用加密通道传输" />
           <Info icon={<CheckCircle2 className="h-4 w-4 text-blue-600" />} title="异步确认" text="以最终订单状态为准" />
         </div>
       </div>
