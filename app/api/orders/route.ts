@@ -14,12 +14,20 @@ const PLANS = {
     price: 149,
   },
   "pro-5x": {
-    title: "ChatGPT Pro $100/$200/$500",
+    title: "ChatGPT Pro 充值 (5x / 20x)",
     price: 720,
+  },
+  "pro-10x": {
+    title: "ChatGPT Pro 充值 (10x / 20x)",
+    price: 1350,
+  },
+  "pro-25x": {
+    title: "ChatGPT Pro 充值 (25x / 20x)",
+    price: 3500,
   },
   pro: {
     title: "ChatGPT Pro 充值 (5x / 20x)",
-    price: 879,
+    price: 720, // 默认 5x 价格
   },
   account: {
     title: "ChatGPT Plus 新号成品",

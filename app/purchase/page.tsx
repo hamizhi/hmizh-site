@@ -154,10 +154,16 @@ export default function PurchasePage() {
     setLoading(true);
 
     try {
+      // 如果是 Pro 套餐，planId 需要包含档位信息
+      const actualPlanId = selectedPlanId === "pro" ? `pro-${proTier}` : selectedPlanId;
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: plan.id, email }),
+        body: JSON.stringify({
+          planId: actualPlanId,
+          email
+        }),
       });
       const data = await response.json();
 
@@ -168,7 +174,7 @@ export default function PurchasePage() {
 
       const orderDraft = {
         orderId: data.orderId,
-        planId: plan.id,
+        planId: actualPlanId,
         planTitle: plan.title,
         price: getCurrentPrice(),
         email,
