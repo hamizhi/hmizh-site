@@ -927,20 +927,35 @@ export default function AdminPage() {
                     {issuedCdks.map((cdk, index) => (
                       <div
                         key={index}
-                        onClick={() => toggleCdkSelection(cdk)}
-                        className={`flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 transition ${
+                        className={`flex items-center gap-3 rounded-lg px-4 py-3 transition ${
                           selectedCdks.includes(cdk)
                             ? "bg-indigo-600/20 ring-2 ring-indigo-500"
-                            : "bg-slate-800/50 hover:bg-slate-700/50"
+                            : "bg-slate-800/50"
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={selectedCdks.includes(cdk)}
-                          onChange={() => {}}
-                          className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-indigo-600 focus:ring-2 focus:ring-indigo-500"
+                          onChange={() => toggleCdkSelection(cdk)}
+                          className="h-4 w-4 rounded border-slate-600 bg-slate-700 text-indigo-600 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
                         />
                         <span className="flex-1 font-mono text-sm text-white">{cdk}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(cdk);
+                            // 可以添加一个临时提示
+                            const btn = e.currentTarget;
+                            const originalText = btn.textContent;
+                            btn.textContent = "已复制";
+                            setTimeout(() => {
+                              btn.textContent = originalText;
+                            }, 1000);
+                          }}
+                          className="rounded-lg bg-slate-700/50 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-600/50 active:scale-95"
+                        >
+                          复制
+                        </button>
                       </div>
                     ))}
                   </div>
