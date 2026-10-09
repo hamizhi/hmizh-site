@@ -107,7 +107,11 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.message || "登录密码错误");
+        if (response.status === 401) {
+          alert(data.message || "管理密码不正确");
+        } else {
+          alert(data.message || "后台数据加载失败，请稍后重试");
+        }
         return;
       }
 
@@ -228,6 +232,7 @@ export default function AdminPage() {
             count: count,
             paymentCountry: issueCountry,
             paymentCurrency: issueCurrency,
+            password,
           }),
         });
 

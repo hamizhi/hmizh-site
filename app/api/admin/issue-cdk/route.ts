@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { issueCdk } from "@/lib/cdk/issue-cdk";
+import { getAdminPassword, isValidAdminPassword } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -7,7 +8,21 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { plan, count, paymentCountry, paymentCurrency } = body;
+    const { plan, count, paymentCountry, paymentCurrency, password } = body;
+
+    if (!getAdminPassword()) {
+      return NextResponse.json(
+        { success: false, error: "后台尚未配置 ADMIN_PASSWORD" },
+        { status: 503 },
+      );
+    }
+
+    if (!isValidAdminPassword(password)) {
+      return NextResponse.json(
+        { success: false, error: "管理密码不正确" },
+        { status: 401 },
+      );
+    }
 
     // 基础验证
     if (!plan) {

@@ -6,10 +6,9 @@ import {
   getAdminData,
   importCards,
 } from "@/lib/db";
+import { getAdminPassword, isValidAdminPassword } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
-
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 type AdminRequest = {
   action?: "get_data" | "import_cards" | "delete_card";
@@ -17,20 +16,21 @@ type AdminRequest = {
   planId?: string;
   cardCodes?: string;
   cardId?: number;
+  importSource?: "manual" | "auto";
 };
 
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as AdminRequest;
 
-    if (!ADMIN_PASSWORD) {
+    if (!getAdminPassword()) {
       return NextResponse.json(
         { success: false, message: "后台尚未配置 ADMIN_PASSWORD" },
         { status: 503 },
       );
     }
 
-    if (body.password !== ADMIN_PASSWORD) {
+    if (!isValidAdminPassword(body.password)) {
       return NextResponse.json(
         { success: false, message: "管理密码不正确" },
         { status: 401 },
@@ -83,7 +83,11 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "服务器内部错误";
+    console.error("Admin API error:", error);
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "后台数据加载失败，请检查数据库结构和服务端日志";
     return NextResponse.json(
       { success: false, message },
       { status: 500 },
