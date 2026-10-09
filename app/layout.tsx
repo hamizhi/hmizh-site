@@ -18,13 +18,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <LenisProvider>{children}</LenisProvider>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-18500682075"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-18503715952"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
         />
-        <Script id="google-ads-tag" strategy="afterInteractive">
+        <Script id="google-ads-tag" strategy="beforeInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
