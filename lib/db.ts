@@ -92,27 +92,27 @@ export async function getAdminData(): Promise<{
       .eq("status", "paid")
       .gte("paid_at", todayStart.toISOString()),
     supabase
-      .from("cards")
+      .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "pro-5x")
       .eq("is_used", 0),
     supabase
-      .from("cards")
+      .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "go")
       .eq("is_used", 0),
     supabase
-      .from("cards")
+      .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "plus")
       .eq("is_used", 0),
     supabase
-      .from("cards")
+      .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "pro")
       .eq("is_used", 0),
     supabase
-      .from("cards")
+      .from("card_keys")
       .select("id", { count: "exact", head: true })
       .eq("plan_id", "account")
       .eq("is_used", 0),
@@ -124,7 +124,7 @@ export async function getAdminData(): Promise<{
       .order("created_at", { ascending: false })
       .limit(100),
     supabase
-      .from("cards")
+      .from("card_keys")
       .select("id, plan_id, card_code, is_used, order_id, import_source, is_redeemed, created_at")
       .order("created_at", { ascending: false })
       .limit(200),
@@ -202,7 +202,7 @@ export async function importCards(
   const supabase = getAdminSupabase();
   const uniqueCodes = [...new Set(cardCodes)];
   const { data, error } = await supabase
-    .from("cards")
+    .from("card_keys")
     .upsert(
       uniqueCodes.map((cardCode) => ({
         plan_id: planId,
@@ -276,7 +276,7 @@ export async function markOrderPaidAndAssignCard(input: {
 export async function deleteUnusedCard(cardId: number): Promise<void> {
   const supabase = getAdminSupabase();
   const { error } = await supabase
-    .from("cards")
+    .from("card_keys")
     .delete()
     .eq("id", cardId)
     .eq("is_used", 0);
