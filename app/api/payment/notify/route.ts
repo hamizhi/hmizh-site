@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getOrderForPayment, markOrderPaidAndAssignCard } from "@/lib/db";
+import { getOrderForPayment, markOrderPaid } from "@/lib/db";
 import { verifyLuckywoodSignature } from "@/lib/payment/luckywood";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ async function handleNotification(request: Request) {
     return new NextResponse("fail", { status: 400 });
   }
 
-  await markOrderPaidAndAssignCard({
+  await markOrderPaid({
     orderId,
     tradeNo,
     money: providerMoney,

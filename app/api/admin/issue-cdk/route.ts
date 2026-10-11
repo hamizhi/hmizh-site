@@ -24,10 +24,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const allowedPlans = new Set(["go", "plus", "pro_5x", "pro_20x", "pro_50x"]);
+
     // 基础验证
-    if (!plan) {
+    if (!plan || !allowedPlans.has(plan)) {
       return NextResponse.json(
-        { success: false, error: "缺少 plan 参数" },
+        { success: false, error: "套餐类型无效，请选择 Go、Plus、Pro 5x、Pro 20x 或 Pro 50x" },
         { status: 400 }
       );
     }

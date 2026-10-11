@@ -77,4 +77,4 @@ npm start
 ZOVOCARD_ORIGIN=https://sandbox.zovocard.com
 ```
 
-沙盒和生产的账号、卡密、域名、数据完全隔离。切换生产时使用 `https://zovocard.com`，不要在浏览器代码中放置 ZovoCard API Key。兑换接口会将 Session 直接转交给 ZovoCard，不写入 Supabase；生产环境必须使用 HTTPS。
+沙盒和生产的账号、卡密、域名、数据完全隔离。切换生产时使用 `https://zovocard.com`，不要在浏览器代码中放置 ZovoCard API Key。兑换接口会把凭据转交给 ZovoCard；官网 `/api/auth/session` JSON 中如有 `sessionToken` 则使用 Session 模式，否则用 `accessToken` 模式。新预检记录不再写入完整凭据，也不会在后台返回旧凭据；旧版已保存的 `cdk_redemptions.session_data` 需要另行清理。生产环境必须使用 HTTPS。

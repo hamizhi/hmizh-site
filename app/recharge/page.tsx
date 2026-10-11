@@ -20,6 +20,7 @@ export default function RechargePage() {
   const [confirmed, setConfirmed] = useState(false);
   const [finished, setFinished] = useState(false);
   const [error, setError] = useState("");
+  const [deliveryStatus, setDeliveryStatus] = useState("delivering");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -30,27 +31,60 @@ export default function RechargePage() {
       setError("缺少订单信息，请从支付页面进入。");
       return;
     }
+    const orderEmail = draft.email;
+    setOrderNo(currentOrderId);
 
-    fetch(`/api/orders/${encodeURIComponent(currentOrderId)}?email=${encodeURIComponent(draft.email)}`, { cache: "no-store" })
-      .then(async (response) => {
+    let stopped = false;
+    const loadOrder = async () => {
+      try {
+        const response = await fetch(
+          `/api/orders/${encodeURIComponent(currentOrderId)}?email=${encodeURIComponent(orderEmail)}`,
+          { cache: "no-store" },
+        );
         const data = await response.json();
-        if (!response.ok || !data.success || data.order.status !== "paid" || !data.order.cardCode) {
-          throw new Error("订单尚未完成支付或卡密还未分配");
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "订单查询失败");
         }
-        setOrderNo(data.order.orderId);
-        setCard(data.order.cardCode);
-        setCardStatus("valid");
+        if (data.order.status === "delivered" && data.order.cardCode) {
+          setDeliveryStatus("delivered");
+          setOrderNo(data.order.orderId);
+          setCard(data.order.cardCode);
+          setCardStatus("valid");
 
-        // 触发 Google Ads 转化事件
-        if (typeof window !== "undefined" && "gtag" in window) {
-          (window as any).gtag("event", "conversion", {
-            send_to: "AW-18500682075",
-          });
+          // 触发 Google Ads 转化事件
+          if (typeof window !== "undefined" && "gtag" in window) {
+            (window as any).gtag("event", "conversion", {
+              send_to: "AW-18500682075",
+            });
+          }
+          return true;
         }
-      })
-      .catch((reason: unknown) => {
-        setError(reason instanceof Error ? reason.message : "订单查询失败");
-      });
+        if (["paid", "delivering"].includes(data.order.status)) {
+          setDeliveryStatus(data.order.status);
+          setError("");
+          return false;
+        }
+
+        throw new Error(`订单当前状态：${data.order.status || "未知"}`);
+      } catch (reason) {
+        if (!stopped) {
+          setError(reason instanceof Error ? reason.message : "订单查询失败");
+        }
+        return false;
+      }
+    };
+
+    void loadOrder();
+    const timer = window.setInterval(async () => {
+      if (await loadOrder()) {
+        window.clearInterval(timer);
+      }
+    }, 3000);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(timer);
+    };
   }, []);
 
   const copyCard = async () => {
@@ -91,6 +125,15 @@ export default function RechargePage() {
             <h1 className="text-xl font-black text-amber-900">暂时无法显示卡密</h1>
             <p className="mt-2 text-sm text-amber-800">{error}</p>
             <Link href="/plus-price" className="mt-5 inline-flex rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white">返回套餐页</Link>
+          </section>
+        ) : !card ? (
+          <section className="mb-6 rounded-3xl border border-indigo-200 bg-indigo-50 p-6 text-center shadow-sm sm:p-8">
+            <RefreshCw className="mx-auto h-8 w-8 animate-spin text-indigo-600" />
+            <h1 className="mt-4 text-xl font-black text-indigo-950">支付成功，卡密分配中</h1>
+            <p className="mt-2 text-sm text-indigo-800">
+              当前状态：{deliveryStatus === "paid" ? "已支付" : "交付中"}，分配完成后本页面会自动显示卡密。
+            </p>
+            <p className="mt-3 text-xs text-indigo-700/70">订单号：{orderNo || "查询中..."}</p>
           </section>
         ) : (
         <section className="mb-6 rounded-3xl border border-gray-200/90 bg-white p-6 shadow-sm sm:p-8">
@@ -138,7 +181,7 @@ export default function RechargePage() {
               <p className="mb-4 text-xs leading-relaxed text-gray-500">
                 请前往兑换站输入卡密完成激活。
               </p>
-              <a href="https://hmizh.com/redeem" target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 py-3.5 text-xs font-bold text-indigo-700 transition-all hover:bg-indigo-100">
+              <a href="https://hamizhi.cc.cd" target="_blank" rel="noreferrer" className="flex w-full items-center justify-center gap-2 rounded-2xl border border-indigo-200 bg-indigo-50 py-3.5 text-xs font-bold text-indigo-700 transition-all hover:bg-indigo-100">
                 前往自主兑换站 <ExternalLink className="h-4 w-4" />
               </a>
             </div>

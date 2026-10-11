@@ -17,6 +17,7 @@ data/
 work/
 outputs/
 .next-*
+.release-builds/
 
 # Admin/test scripts with secrets
 check-order.js

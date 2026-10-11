@@ -1,52 +1,21 @@
 import { NextResponse } from "next/server";
 import { createPendingOrder } from "@/lib/db";
+import { ORDER_PLANS, type OrderPlanId } from "@/lib/order-plans";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-const PLANS = {
-  go: {
-    title: "ChatGPT Go / 月",
-    price: 50,
-  },
-  plus: {
-    title: "ChatGPT Plus 一键升级 / 月",
-    price: 149,
-  },
-  "pro-5x": {
-    title: "ChatGPT Pro 充值 (5x / 20x)",
-    price: 720,
-  },
-  "pro-10x": {
-    title: "ChatGPT Pro 充值 (10x / 20x)",
-    price: 1350,
-  },
-  "pro-25x": {
-    title: "ChatGPT Pro 充值 (25x / 20x)",
-    price: 3500,
-  },
-  pro: {
-    title: "ChatGPT Pro 充值 (5x / 20x)",
-    price: 720, // 默认 5x 价格
-  },
-  account: {
-    title: "ChatGPT Plus 新号成品",
-    price: 189,
-  },
-} as const;
-
-type PlanId = keyof typeof PLANS;
 
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
       email?: string;
       planId?: string;
+      couponCode?: string;
     };
 
     const email = body.email?.trim() ?? "";
-    const planId = body.planId as PlanId;
-    const plan = PLANS[planId];
+    const planId = body.planId as OrderPlanId;
+    const plan = ORDER_PLANS[planId];
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
@@ -62,18 +31,34 @@ export async function POST(request: Request) {
       );
     }
 
-    const orderId = await createPendingOrder({
-      email,
-      planId,
-      planName: plan.title,
-      money: plan.price,
-    });
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip")?.trim() ||
+      null;
+
+    let order;
+    try {
+      order = await createPendingOrder({
+        email, planId, planName: plan.title, money: plan.price, clientIp,
+        couponCode: body.couponCode?.trim() || null,
+      });
+    } catch (error) {
+      if (error instanceof Error && /invalid_coupon|coupon_exceeds_price/.test(error.message)) {
+        return NextResponse.json(
+          { success: false, message: "优惠码无效、已过期或不适用于该套餐" },
+          { status: 400 },
+        );
+      }
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,
-      orderId,
+      orderId: order.orderId,
       planId,
-      price: plan.price,
+      price: order.price,
+      discountAmount: order.discountAmount,
+      couponCode: order.couponCode,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "创建订单失败";

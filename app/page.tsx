@@ -152,11 +152,11 @@ const PLANS = [
     id: "plus",
     name: "ChatGPT Plus",
     tag: "🔥 爆款热销",
-    badge: "立减 ¥50",
+    badge: "Plus档位可选",
     price: "149",
     period: "/ 月",
     originalPrice: "199",
-    dailyPrice: "限时优惠价 ¥149",
+    dailyPrice: "直冲Plus / Plus成品号",
     discount: "50",
     stock: "仅剩 23 份",
     description: "解锁高级智能，越用越懂你的偏好",
@@ -170,6 +170,12 @@ const PLANS = [
     ],
     popular: true,
     glow: "indigo",
+    tiers: [
+      { id: "plus", label: "直冲Plus", price: "149", originalPrice: "199", officialPrice: "" },
+      { id: "account", label: "Plus成品号", price: "159", originalPrice: "159", officialPrice: "" },
+    ],
+    defaultTier: "plus",
+    hasTiers: true,
   },
   {
     id: "pro",
@@ -261,6 +267,7 @@ export default function Home() {
   const [countdown, setCountdown] = useState({ hours: 2, minutes: 34, seconds: 18 });
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [proTier, setProTier] = useState("5x"); // Pro 套餐档位选择
+  const [plusTier, setPlusTier] = useState("plus"); // Plus 套餐档位选择
 
   const handleCopy = () => {
     navigator.clipboard.writeText("CR-9F2A-88KL-7K2Q");
@@ -594,11 +601,19 @@ export default function Home() {
           <div className="grid items-stretch gap-6 md:grid-cols-3">
             {PLANS.map((plan) => {
               // 如果是 Pro 套餐，根据选中的档位动态更新价格
+              const activeTierId = plan.id === "plus" ? plusTier : proTier;
               const currentTier = plan.hasTiers && plan.tiers
-                ? plan.tiers.find(t => t.id === proTier) || plan.tiers[0]
+                ? plan.tiers.find(t => t.id === activeTierId) || plan.tiers[0]
                 : null;
               const displayPrice = currentTier ? currentTier.price : plan.price;
               const displayOriginalPrice = currentTier ? currentTier.originalPrice : plan.originalPrice;
+              const selectedVariant = plan.id === "plus"
+                ? plusTier
+                : plan.id === "pro"
+                  ? proTier
+                  : "";
+              const tierButtonWidth = plan.id === "plus" ? 102 : 40;
+              const tierButtonStep = tierButtonWidth + 4;
 
               return (
                 <div
@@ -615,10 +630,10 @@ export default function Home() {
                       <div className="relative bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 rounded-full px-1 py-1 shadow-2xl shadow-black/40">
                         {/* 滑动背景指示器 */}
                         <div
-                          className="absolute top-1 h-7 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out shadow-lg shadow-indigo-500/50"
+                          className="absolute top-1 bottom-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out shadow-lg shadow-indigo-500/50"
                           style={{
-                            left: `${4 + plan.tiers.findIndex(t => t.id === proTier) * 44}px`,
-                            width: '40px'
+                            left: `${4 + plan.tiers.findIndex(t => t.id === activeTierId) * tierButtonStep}px`,
+                            width: `${tierButtonWidth}px`
                           }}
                         />
 
@@ -630,10 +645,16 @@ export default function Home() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                setProTier(tier.id);
+                                if (plan.id === "plus") {
+                                  setPlusTier(tier.id);
+                                } else {
+                                  setProTier(tier.id);
+                                }
                               }}
-                              className={`relative px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
-                                proTier === tier.id
+                              className={`relative whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
+                                plan.id === "plus" ? "w-[102px]" : "w-[40px]"
+                              } ${
+                                activeTierId === tier.id
                                   ? 'text-white'
                                   : 'text-slate-400 hover:text-slate-200'
                               }`}
@@ -645,7 +666,7 @@ export default function Home() {
                       </div>
 
                       {/* 官网价格提示 */}
-                      {currentTier && (
+                      {currentTier?.officialPrice && (
                         <div className="absolute top-11 left-0 text-xs text-white whitespace-nowrap">
                           官网 {currentTier.officialPrice}
                         </div>
@@ -653,9 +674,9 @@ export default function Home() {
                     </div>
                   )}
 
-                  {plan.popular && !plan.hasTiers && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
-                      🔥 {plan.tag}
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-6 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                      {plan.tag}
                     </div>
                   )}
 
@@ -665,14 +686,20 @@ export default function Home() {
                       {plan.name}
                     </h3>
                     {!plan.popular && (
-                      <span className="text-[11px] bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700/50 font-semibold">
+                      <span
+                        className={`text-[11px] px-2 py-0.5 rounded-full border font-semibold ${
+                          plan.id === "pro"
+                            ? "flagship-badge"
+                            : "bg-slate-700 text-slate-400 border-slate-700/50"
+                        }`}
+                      >
                         {plan.badge}
                       </span>
                     )}
                   </div>
 
                   <div className="inline-block text-[11px] font-bold text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded mb-3">
-                    {plan.dailyPrice}
+                    {plan.id === "plus" && currentTier ? `当前档位：${currentTier.label} ¥${displayPrice}` : plan.dailyPrice}
                   </div>
 
                   <p className="text-slate-400 text-xs sm:text-sm mb-3 leading-relaxed font-normal">
@@ -711,7 +738,7 @@ export default function Home() {
                 </div>
 
                 <Link
-                  href={`/purchase?plan=${plan.id}`}
+                  href={`/purchase?plan=${plan.id}${selectedVariant ? `&tier=${selectedVariant}` : ""}`}
                   className={`flex w-full items-center justify-center rounded-xl py-3 text-center font-bold text-sm transition-all duration-200 ${
                     plan.popular
                       ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/25 active:scale-98"
@@ -1355,7 +1382,7 @@ export default function Home() {
       {/* 9. 右下角常驻在线客服按钮 */}
       <div className="fixed bottom-6 right-6 z-40">
         <a
-          href="https://work.weixin.qq.com/ca/cawcde60678a3fe1d6"
+          href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-3 rounded-full shadow-lg shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95"

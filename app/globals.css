@@ -47,6 +47,209 @@ button, a { -webkit-tap-highlight-color: transparent; }
   animation-play-state: paused;
 }
 
+@keyframes flagshipGlow {
+  0%, 100% {
+    box-shadow: 0 0 7px rgb(234 179 8 / 0.16), inset 0 0 7px rgb(255 236 153 / 0.06);
+  }
+  50% {
+    box-shadow: 0 0 13px rgb(234 179 8 / 0.32), 0 0 24px rgb(245 158 11 / 0.1), inset 0 0 10px rgb(255 236 153 / 0.12);
+  }
+}
+
+@keyframes flagshipShimmer {
+  0%, 70%, 100% {
+    background-position: 120% 50%;
+  }
+  35% {
+    background-position: -20% 50%;
+  }
+}
+
+.flagship-badge {
+  color: #ffe7a0 !important;
+  background: linear-gradient(
+    110deg,
+    rgb(92 62 13 / 0.72) 0%,
+    rgb(145 101 20 / 0.78) 34%,
+    rgb(255 231 145 / 0.96) 50%,
+    rgb(145 101 20 / 0.78) 66%,
+    rgb(92 62 13 / 0.72) 100%
+  ) !important;
+  background-size: 220% 100% !important;
+  border-color: rgb(245 196 75 / 0.62) !important;
+  text-shadow: 0 0 5px rgb(255 220 120 / 0.62);
+  animation: flagshipShimmer 6s ease-in-out infinite, flagshipGlow 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flagship-badge {
+    animation: none;
+  }
+}
+
+/* 后台保持轻量的黑白灰运营风格，不影响前台页面。 */
+.admin-shell {
+  --admin-bg: #f7f7f8;
+  --admin-surface: #ffffff;
+  --admin-subtle: #f4f4f5;
+  --admin-line: #e4e4e7;
+  --admin-ink: #18181b;
+  --admin-muted: #71717a;
+  background: var(--admin-bg) !important;
+  color: var(--admin-ink) !important;
+}
+
+.admin-shell aside,
+.admin-shell main {
+  background: var(--admin-surface) !important;
+}
+
+.admin-shell aside {
+  border-color: var(--admin-line) !important;
+  backdrop-filter: none !important;
+}
+
+.admin-shell [class*="bg-slate-"],
+.admin-shell [class*="bg-indigo-"],
+.admin-shell [class*="bg-emerald-"],
+.admin-shell [class*="bg-blue-"],
+.admin-shell [class*="bg-violet-"],
+.admin-shell [class*="bg-rose-"],
+.admin-shell [class*="bg-amber-"],
+.admin-shell [class*="bg-sky-"],
+.admin-shell [class*="bg-red-"],
+.admin-shell [class*="bg-purple-"],
+.admin-shell [class*="bg-orange-"] {
+  background-color: var(--admin-surface) !important;
+}
+
+.admin-shell [class*="bg-slate-800"],
+.admin-shell [class*="bg-slate-700"],
+.admin-shell [class*="bg-slate-600"],
+.admin-shell [class*="bg-indigo-500/10"],
+.admin-shell [class*="bg-indigo-500/20"],
+.admin-shell [class*="bg-indigo-600"],
+.admin-shell [class*="bg-indigo-700"],
+.admin-shell [class*="bg-emerald-500/10"],
+.admin-shell [class*="bg-blue-500/10"],
+.admin-shell [class*="bg-violet-500/10"],
+.admin-shell [class*="bg-rose-500/10"],
+.admin-shell [class*="bg-amber-500/10"],
+.admin-shell [class*="bg-sky-500/10"],
+.admin-shell [class*="bg-red-500/10"],
+.admin-shell [class*="bg-purple-500/10"],
+.admin-shell [class*="bg-orange-500/10"] {
+  background-color: var(--admin-subtle) !important;
+}
+
+.admin-shell [class*="bg-indigo-600"],
+.admin-shell [class*="bg-indigo-700"] {
+  background-color: var(--admin-ink) !important;
+  color: #ffffff !important;
+}
+
+.admin-shell [class*="bg-indigo-600"]:hover,
+.admin-shell [class*="bg-indigo-700"]:hover {
+  background-color: #3f3f46 !important;
+}
+
+.admin-shell [class*="text-white"],
+.admin-shell [class*="text-indigo-"],
+.admin-shell [class*="text-emerald-"],
+.admin-shell [class*="text-blue-"],
+.admin-shell [class*="text-violet-"],
+.admin-shell [class*="text-rose-"],
+.admin-shell [class*="text-amber-"],
+.admin-shell [class*="text-sky-"],
+.admin-shell [class*="text-red-"],
+.admin-shell [class*="text-purple-"],
+.admin-shell [class*="text-orange-"] {
+  color: var(--admin-ink) !important;
+}
+
+.admin-shell [class*="text-slate-200"] {
+  color: #3f3f46 !important;
+}
+
+.admin-shell [class*="text-slate-300"],
+.admin-shell [class*="text-slate-400"],
+.admin-shell [class*="text-slate-500"],
+.admin-shell [class*="text-slate-600"] {
+  color: var(--admin-muted) !important;
+}
+
+.admin-shell [class*="bg-indigo-600"],
+.admin-shell [class*="bg-indigo-700"] {
+  color: #ffffff !important;
+}
+
+.admin-shell [class*="hover:text-white"]:hover,
+.admin-shell [class*="hover:text-indigo-"]:hover,
+.admin-shell [class*="hover:text-slate-"]:hover {
+  color: var(--admin-ink) !important;
+}
+
+.admin-shell [class*="border-slate-"],
+.admin-shell [class*="border-indigo-"],
+.admin-shell [class*="border-emerald-"],
+.admin-shell [class*="border-amber-"],
+.admin-shell [class*="border-red-"],
+.admin-shell [class*="border-slate-"] {
+  border-color: var(--admin-line) !important;
+}
+
+.admin-shell [class*="divide-slate-"] > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--admin-line) !important;
+}
+
+.admin-shell [class*="ring-indigo-"],
+.admin-shell [class*="ring-emerald-"],
+.admin-shell [class*="ring-purple-"],
+.admin-shell [class*="ring-rose-"] {
+  --tw-ring-color: #a1a1aa !important;
+}
+
+.admin-shell input,
+.admin-shell textarea,
+.admin-shell select {
+  border-color: var(--admin-line) !important;
+  background-color: var(--admin-surface) !important;
+  color: var(--admin-ink) !important;
+}
+
+.admin-shell input::placeholder,
+.admin-shell textarea::placeholder {
+  color: #a1a1aa !important;
+}
+
+.admin-shell input:focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus {
+  border-color: #71717a !important;
+  --tw-ring-color: rgb(113 113 122 / 0.16) !important;
+}
+
+.admin-shell option {
+  background: #ffffff;
+  color: var(--admin-ink);
+}
+
+.admin-shell table thead {
+  background: #fafafa !important;
+}
+
+.admin-shell table tbody tr:hover {
+  background: #fafafa !important;
+}
+
+.admin-shell button:disabled {
+  color: #a1a1aa !important;
+}
+
+.admin-shell .shadow-2xl {
+  box-shadow: 0 18px 45px rgb(24 24 27 / 0.12) !important;
+}
+
 /* 价格切换动画 */
 @keyframes fadeInScale {
   0% {

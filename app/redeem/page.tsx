@@ -582,7 +582,7 @@ export default function RedeemPage() {
                   </div>
                 </div>
                 <a
-                  href="https://work.weixin.qq.com/kfid/kfc5d2ac29f3003753a"
+                  href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3.5 text-sm font-bold text-white shadow-lg transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl"

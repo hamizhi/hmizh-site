@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseCdkCredential } from "@/lib/cdk/credential";
 import { attachDeviceCookie, callZovoCard } from "@/lib/cdk/zovocard";
 import { getAdminSupabase } from "@/lib/supabase";
 
@@ -25,18 +26,31 @@ export async function POST(request: Request) {
       );
     }
 
+    const credential = parseCdkCredential(session);
+    if (!credential) {
+      return NextResponse.json(
+        {
+          code: 400,
+          error_code: "invalid_credential",
+          msg: "充值信息须包含 sessionToken 或 accessToken，请从 ChatGPT 官网重新复制完整 JSON",
+        },
+        { status: 400 },
+      );
+    }
+
     const result = await callZovoCard(request, "/api/v1/cdk/preflight", {
       method: "POST",
       body: {
         redemption_token: redemptionToken,
-        credential: { mode: "session", session },
+        credential,
       },
     });
 
     // 如果验证成功，保存兑换记录到数据库
     if (result.response.status === 200) {
       try {
-        const responseData = await result.response.json();
+        const responseData = await result.response.clone().json();
+        if (responseData.code !== 0) return attachDeviceCookie(result.response, result.device);
         const email = responseData.data?.email;
         const plan = responseData.data?.plan;
 

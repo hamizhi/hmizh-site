@@ -27,7 +27,7 @@ export async function GET(
         status: order.status,
         planName: order.plan_name,
         money: order.money,
-        cardCode: order.status === "paid" ? order.card_code : null,
+        cardCode: order.status === "delivered" ? order.card_code : null,
       },
     });
   } catch (error) {

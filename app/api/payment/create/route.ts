@@ -39,7 +39,6 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
-
     const notifyUrl = `${siteUrl}/api/payment/notify`;
     const returnUrl = `${siteUrl}/api/payment/return?order_id=${encodeURIComponent(
       order.order_id,

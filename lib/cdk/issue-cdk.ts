@@ -16,7 +16,7 @@ function getApiKey() {
 }
 
 export type IssueCdkParams = {
-  plan: "go" | "plus" | "pro_5x" | "pro_10x" | "pro_25x" | "pro_50x";
+  plan: "go" | "plus" | "pro_5x" | "pro_20x" | "pro_50x";
   count: number;
   paymentCountry?: "US" | "JP" | "PH" | "CL" | "EG" | "NG" | "TR";
   paymentCurrency?: "USD" | "JPY" | "PHP" | "CLP" | "EGP" | "NGN" | "TRY";

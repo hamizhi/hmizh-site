@@ -10,6 +10,8 @@ type Draft = {
   planId?: string;
   planTitle?: string;
   price?: number;
+  couponCode?: string | null;
+  discountAmount?: number;
   email?: string;
   payType?: "alipay" | "wxpay";
 };
@@ -19,7 +21,7 @@ const PRICE_MAP: Record<string, { title: string; price: number }> = {
   plus: { title: "ChatGPT Plus 一键升级 / 月", price: 149 },
   "pro-5x": { title: "ChatGPT Pro $100/$200/$500", price: 720 },
   pro: { title: "ChatGPT Pro 充值 (5x / 20x)", price: 879 },
-  account: { title: "ChatGPT Plus 新号成品", price: 189 },
+  account: { title: "ChatGPT Plus 成品号", price: 159 },
 };
 
 export default function PayPage() {
@@ -103,7 +105,11 @@ export default function PayPage() {
           { cache: "no-store" },
         );
         const data = await response.json();
-        if (response.ok && data.success && data.order.status === "paid") {
+        if (
+          response.ok &&
+          data.success &&
+          ["paid", "delivering", "delivered"].includes(data.order.status)
+        ) {
           setPaid(true);
           window.location.href = `/recharge?order_id=${encodeURIComponent(draft.orderId!)}`;
         }
@@ -150,7 +156,7 @@ export default function PayPage() {
             <Clock3 className="h-3.5 w-3.5" /> 请在 {formatTime(countdown)} 内完成支付
           </div>
           <h1 className="mb-1 text-xl font-black text-gray-900 sm:text-2xl">{payType}</h1>
-          <p className="mb-6 text-xs text-gray-500">请使用支付宝扫描二维码完成付款</p>
+          <p className="mb-6 text-xs text-gray-500">请按页面提示完成付款</p>
 
           {paymentLoading ? (
             <div className="relative mb-6 inline-flex h-64 w-64 items-center justify-center rounded-2xl border-2 border-indigo-100 bg-gray-50 text-sm text-gray-500 shadow-md">
@@ -160,7 +166,7 @@ export default function PayPage() {
             <div className="relative mb-6 inline-block rounded-2xl border-2 border-indigo-100 bg-white p-4 shadow-md">
               <div className="relative flex h-56 w-56 items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white">
                 <img src={qrImage} alt="支付宝支付二维码" className="h-56 w-56" />
-                <span className="absolute bottom-2 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white">¥{price}.00</span>
+                <span className="absolute bottom-2 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white">¥{Number(price).toFixed(2)}</span>
               </div>
             </div>
           ) : (
@@ -171,7 +177,8 @@ export default function PayPage() {
 
           <div className="mb-6 space-y-2 rounded-2xl border border-gray-200 bg-gray-50/80 p-4 text-left text-xs text-gray-600">
             <Row label="商品名称" value={draft?.planTitle ?? plan.title} />
-            <Row label="应付金额" value={`¥${price}.00`} emphasis />
+            <Row label="应付金额" value={`¥${Number(price).toFixed(2)}`} emphasis />
+            {draft?.couponCode && <Row label={`优惠码 ${draft.couponCode}`} value={`已减 ¥${Number(draft.discountAmount || 0).toFixed(2)}`} />}
             <Row label="关联邮箱" value={draft?.email || "未填写"} />
             <Row label="商户订单号" value={orderNo || "生成中..."} />
           </div>

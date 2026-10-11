@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     // 兑换请求已提交，更新数据库状态
     if (result.response.status === 200) {
       try {
-        const responseData = await result.response.json();
+        const responseData = await result.response.clone().json();
         const orderId = responseData.data?.order?.order_id;
 
         const supabase = getAdminSupabase();

@@ -36,6 +36,24 @@ const PLANS = {
     discount: 50,
     price: 149,
     badge: "最受欢迎",
+    tiers: [
+      {
+        id: "plus",
+        label: "直冲Plus",
+        officialPrice: "",
+        originalPrice: 199,
+        discount: 50,
+        price: 149,
+      },
+      {
+        id: "account",
+        label: "Plus成品号",
+        officialPrice: "",
+        originalPrice: 159,
+        discount: 0,
+        price: 159,
+      },
+    ],
     features: [
       "面向复杂工作的高级智能",
       "更高质量的图像生成",
@@ -93,41 +111,57 @@ type PayType = "alipay" | "wxpay";
 export default function PurchasePage() {
   const router = useRouter();
   const [selectedPlanId, setSelectedPlanId] = useState<PlanId>("plus");
+  const [plusTier, setPlusTier] = useState("plus"); // Plus 套餐档位选择
   const [proTier, setProTier] = useState("5x"); // Pro 套餐档位选择
   const [email, setEmail] = useState("");
   const [payType, setPayType] = useState<PayType>("alipay");
   const [agree, setAgree] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; amount: number; planId: string } | null>(null);
+  const [couponMessage, setCouponMessage] = useState("");
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
 
   useEffect(() => {
-    const planFromUrl = new URLSearchParams(window.location.search).get("plan");
+    const params = new URLSearchParams(window.location.search);
+    const planFromUrl = params.get("plan");
+    const tierFromUrl = params.get("tier");
     if (planFromUrl && planFromUrl in PLANS) {
       setSelectedPlanId(planFromUrl as PlanId);
+    }
+    if (tierFromUrl === "plus" || tierFromUrl === "account") {
+      setPlusTier(tierFromUrl);
+    }
+    if (tierFromUrl === "5x" || tierFromUrl === "10x" || tierFromUrl === "25x") {
+      setProTier(tierFromUrl);
     }
   }, []);
 
   const plan = PLANS[selectedPlanId];
 
-  // 如果是 Pro 套餐，获取当前选中档位的价格
+  // Plus 和 Pro 都根据当前档位获取价格
   const getCurrentPrice = () => {
-    if (selectedPlanId === "pro" && "tiers" in plan) {
-      const currentTier = plan.tiers.find(t => t.id === proTier);
+    if ("tiers" in plan) {
+      const tierId = selectedPlanId === "plus" ? plusTier : proTier;
+      const currentTier = plan.tiers.find(t => t.id === tierId);
       return currentTier ? currentTier.price : plan.tiers[0].price;
     }
     return "price" in plan ? plan.price : 720;
   };
 
   const getCurrentOriginalPrice = () => {
-    if (selectedPlanId === "pro" && "tiers" in plan) {
-      const currentTier = plan.tiers.find(t => t.id === proTier);
+    if ("tiers" in plan) {
+      const tierId = selectedPlanId === "plus" ? plusTier : proTier;
+      const currentTier = plan.tiers.find(t => t.id === tierId);
       return currentTier ? currentTier.originalPrice : plan.tiers[0].originalPrice;
     }
     return "originalPrice" in plan ? plan.originalPrice : 720;
   };
 
   const getCurrentDiscount = () => {
-    if (selectedPlanId === "pro" && "tiers" in plan) {
-      const currentTier = plan.tiers.find(t => t.id === proTier);
+    if ("tiers" in plan) {
+      const tierId = selectedPlanId === "plus" ? plusTier : proTier;
+      const currentTier = plan.tiers.find(t => t.id === tierId);
       return currentTier ? currentTier.discount : plan.tiers[0].discount;
     }
     return "discount" in plan ? plan.discount : 0;
@@ -136,6 +170,42 @@ export default function PurchasePage() {
   const finalPrice = getCurrentPrice();
   const finalOriginalPrice = getCurrentOriginalPrice();
   const finalDiscount = getCurrentDiscount();
+  const activeTierId = selectedPlanId === "plus" ? plusTier : proTier;
+  const selectedTier = "tiers" in plan
+    ? plan.tiers.find((tier) => tier.id === activeTierId) || plan.tiers[0]
+    : null;
+  const actualPlanId = selectedPlanId === "pro"
+    ? `pro-${proTier}`
+    : selectedPlanId === "plus"
+      ? plusTier
+      : selectedPlanId;
+  const activeCoupon = appliedCoupon?.planId === actualPlanId ? appliedCoupon : null;
+  const amountDue = finalPrice - (activeCoupon?.amount || 0);
+
+  const applyCoupon = async () => {
+    setCheckingCoupon(true);
+    setAppliedCoupon(null);
+    setCouponMessage("");
+    try {
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponInput.trim(), planId: actualPlanId }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        setCouponMessage(data.message || "优惠码不可用");
+        return;
+      }
+      setAppliedCoupon({ code: data.code, amount: data.amount, planId: actualPlanId });
+      setCouponInput(data.code);
+      setCouponMessage(`已减免 ¥${Number(data.amount).toFixed(2)}`);
+    } catch {
+      setCouponMessage("验证失败，请稍后重试");
+    } finally {
+      setCheckingCoupon(false);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -151,18 +221,22 @@ export default function PurchasePage() {
       return;
     }
 
+    if (couponInput.trim() && (!activeCoupon || activeCoupon.code !== couponInput.trim().toUpperCase())) {
+      setCouponMessage("请先应用当前套餐的优惠码");
+      return;
+    }
+
     setLoading(true);
 
     try {
       // 如果是 Pro 套餐，planId 需要包含档位信息
-      const actualPlanId = selectedPlanId === "pro" ? `pro-${proTier}` : selectedPlanId;
-
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           planId: actualPlanId,
-          email
+          email,
+          couponCode: activeCoupon?.code || null,
         }),
       });
       const data = await response.json();
@@ -175,8 +249,10 @@ export default function PurchasePage() {
       const orderDraft = {
         orderId: data.orderId,
         planId: actualPlanId,
-        planTitle: plan.title,
-        price: getCurrentPrice(),
+        planTitle: selectedTier?.label === "Plus成品号" ? "ChatGPT Plus 成品号" : plan.title,
+        price: data.price,
+        couponCode: data.couponCode,
+        discountAmount: data.discountAmount,
         email,
         payType,
         createdAt: Date.now(),
@@ -229,6 +305,10 @@ export default function PurchasePage() {
               {(Object.keys(PLANS) as PlanId[]).map((key) => {
                 const item = PLANS[key];
                 const active = selectedPlanId === key;
+                const tierId = key === "plus" ? plusTier : key === "pro" ? proTier : "";
+                const cardTier = "tiers" in item
+                  ? item.tiers.find((tier) => tier.id === tierId) || item.tiers[0]
+                  : null;
                 return (
                   <button
                     type="button"
@@ -251,7 +331,7 @@ export default function PurchasePage() {
                       {key === "go" ? "Go" : key === "plus" ? "Plus" : "Pro"}
                     </div>
                     <div className="relative mt-0.5 text-base font-black text-indigo-400">
-                      ¥{"price" in item ? item.price : ("tiers" in item && item.tiers ? item.tiers[0].price : 0)}
+                      ¥{"price" in item ? item.price : cardTier?.price || 0}
                       {key === "pro" && <span className="text-xs font-normal text-slate-400"> 起</span>}
                     </div>
                   </button>
@@ -261,15 +341,15 @@ export default function PurchasePage() {
           </div>
 
           <div className="my-6 border-y border-slate-700/50 py-5">
-            {/* Pro 档位选择器 - 灵动岛风格 */}
-            {selectedPlanId === "pro" && "tiers" in plan && (
+            {/* Plus / Pro 档位选择器 - 灵动岛风格 */}
+            {"tiers" in plan && (
               <div className="mb-6 flex justify-center">
                 <div className="relative bg-slate-900/80 backdrop-blur-2xl border border-slate-700/50 rounded-full px-1 py-1 shadow-2xl shadow-black/40">
                   {/* 滑动背景指示器 */}
                   <div
                     className="absolute top-1 bottom-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out shadow-lg shadow-indigo-500/50"
                     style={{
-                      left: `${4 + plan.tiers.findIndex(t => t.id === proTier) * 106}px`,
+                      left: `${4 + plan.tiers.findIndex(t => t.id === activeTierId) * 106}px`,
                       width: '102px'
                     }}
                   />
@@ -278,10 +358,17 @@ export default function PurchasePage() {
                   <div className="relative flex gap-1">
                     {plan.tiers.map((tier) => (
                       <button
+                        type="button"
                         key={tier.id}
-                        onClick={() => setProTier(tier.id)}
-                        className={`relative px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 w-[102px] ${
-                          proTier === tier.id
+                        onClick={() => {
+                          if (selectedPlanId === "plus") {
+                            setPlusTier(tier.id);
+                          } else {
+                            setProTier(tier.id);
+                          }
+                        }}
+                        className={`relative whitespace-nowrap px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 w-[102px] ${
+                          activeTierId === tier.id
                             ? 'text-white'
                             : 'text-slate-400 hover:text-slate-200'
                         }`}
@@ -347,6 +434,33 @@ export default function PurchasePage() {
             <div className="mt-1.5 text-[11px] text-slate-500">* 无需接收验证码。付款成功后系统会自动将充值卡密与该邮箱绑定。</div>
           </div>
 
+          <div className="mb-6">
+            <label htmlFor="coupon" className="mb-2 block text-xs font-bold text-slate-300">
+              优惠码
+            </label>
+            <div className="flex gap-2">
+              <input
+                id="coupon"
+                type="text"
+                maxLength={32}
+                autoComplete="off"
+                placeholder="输入优惠码"
+                value={couponInput}
+                onChange={(event) => {
+                  setCouponInput(event.target.value.toUpperCase());
+                  setAppliedCoupon(null);
+                  setCouponMessage("");
+                }}
+                className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-800/50 px-3 py-2.5 text-sm text-white outline-none focus:border-indigo-500"
+              />
+              <button type="button" onClick={() => void applyCoupon()} disabled={!couponInput.trim() || checkingCoupon} className="rounded-lg border border-indigo-500 px-4 py-2 text-sm font-semibold text-indigo-300 disabled:opacity-50">
+                {checkingCoupon ? "验证中" : "使用"}
+              </button>
+            </div>
+            {couponMessage && <p role="status" className={`mt-2 text-xs ${activeCoupon ? "text-emerald-400" : "text-amber-400"}`}>{activeCoupon ? couponMessage : couponInput.trim() && appliedCoupon ? "切换套餐后请重新使用优惠码" : couponMessage}</p>}
+            {appliedCoupon && !activeCoupon && <p className="mt-2 text-xs text-amber-400">切换套餐后请重新使用优惠码</p>}
+          </div>
+
           <div className="mb-8">
             <div className="mb-2.5 text-xs font-bold text-slate-300">选择支付方式</div>
             <div className="grid grid-cols-2 gap-3">
@@ -369,7 +483,7 @@ export default function PurchasePage() {
 
           <div className="mb-6">
             <a
-              href="https://work.weixin.qq.com/ca/cawcde60678a3fe1d6"
+              href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-400 transition-all hover:bg-emerald-500/20 hover:border-emerald-500/50"
@@ -384,7 +498,8 @@ export default function PurchasePage() {
           <div className="mb-6 space-y-2 rounded-2xl border border-slate-700/50 bg-slate-800/50 p-4 text-xs text-slate-400">
             <div className="flex justify-between"><span>商品原价</span><span className="font-mono">¥{finalOriginalPrice}.00</span></div>
             <div className="flex justify-between text-orange-400"><span>限时优惠减免</span><span className="font-mono">-¥{finalDiscount}.00</span></div>
-            <div className="flex items-baseline justify-between border-t border-slate-700/50 pt-2 text-sm font-bold text-white"><span>实付金额</span><span className="font-mono text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">¥{finalPrice}.00</span></div>
+            {activeCoupon && <div className="flex justify-between text-emerald-400"><span>优惠码 {activeCoupon.code}</span><span className="font-mono">-¥{activeCoupon.amount.toFixed(2)}</span></div>}
+            <div className="flex items-baseline justify-between border-t border-slate-700/50 pt-2 text-sm font-bold text-white"><span>实付金额</span><span className="font-mono text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">¥{amountDue.toFixed(2)}</span></div>
           </div>
 
           <div className="mb-6 flex items-start gap-2 text-xs text-slate-400">
