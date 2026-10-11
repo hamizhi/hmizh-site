@@ -103,7 +103,7 @@ export default function RechargePage() {
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-base font-bold text-white">G</span>
-            <span className="text-lg font-bold tracking-[-0.5px]">GETGPT <span className="text-indigo-600">Pro</span></span>
+            <span className="text-lg font-bold tracking-[-0.5px]">GPT <span className="text-indigo-600">PRO</span></span>
           </Link>
           <span className="flex items-center gap-2 text-xs text-gray-500"><ShieldCheck className="h-4 w-4 text-emerald-500" />官方正规直充 · 不收集账号密码</span>
         </div>

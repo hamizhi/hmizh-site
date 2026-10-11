@@ -132,7 +132,7 @@ export default function PayPage() {
         <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-base font-bold text-white">G</span>
-            <span className="text-lg font-bold tracking-[-0.5px]">GETGPT <span className="text-indigo-600">Pro</span></span>
+            <span className="text-lg font-bold tracking-[-0.5px]">GPT <span className="text-indigo-600">PRO</span></span>
           </Link>
           <Link href="/purchase" className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-900">
             <ArrowLeft className="h-3.5 w-3.5" /> 返回修改订单
