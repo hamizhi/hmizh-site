@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Clipboard,
   ExternalLink,
+  MessageCircle,
   RefreshCw,
   ShieldCheck,
   Zap,
@@ -194,6 +195,16 @@ export default function RechargePage() {
             <a href="https://chatgpt.com/" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-sm font-bold text-white shadow-md shadow-indigo-500/25 hover:bg-indigo-700">前往 ChatGPT 查验权益 <ExternalLink className="h-4 w-4" /></a>
           </section>
         )}
+        <a
+          href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+        >
+          <MessageCircle className="h-4 w-4" />
+          联系客服
+          <ExternalLink className="h-3.5 w-3.5" />
+        </a>
       </main>
     </div>
   );

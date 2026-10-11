@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Clock3, ExternalLink, ShieldAlert } from "lucide-react";
+import { ArrowLeft, Clock3, ExternalLink, MessageCircle, ShieldAlert } from "lucide-react";
 import QRCode from "qrcode";
 
 type Draft = {
@@ -187,6 +187,16 @@ export default function PayPage() {
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
             支付完成后系统会自动核验订单，确认成功后进入卡密页面。请不要重复支付。
           </div>
+          <a
+            href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-4 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
+          >
+            <MessageCircle className="h-4 w-4" />
+            联系客服
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
           <p className="mt-4 text-[11px] text-gray-400">付款后请停留在此页面，系统会自动检测支付结果。</p>
         </section>
       </main>
