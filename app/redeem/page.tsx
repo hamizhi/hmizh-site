@@ -88,6 +88,7 @@ export default function RedeemPage() {
   const [preflightToken, setPreflightToken] = useState("");
   const [orderId, setOrderId] = useState("");
   const clientRequestId = useRef("");
+  const renewalOfferRef = useRef<HTMLDivElement>(null);
   const autoRefreshInterval = useRef<NodeJS.Timeout | null>(null);
 
   const resetFromCode = () => {
@@ -285,6 +286,14 @@ export default function RedeemPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (state !== "success" || !window.matchMedia("(max-width: 767px)").matches) return;
+    const timer = window.setTimeout(() => {
+      renewalOfferRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [state]);
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900">
       <header className="border-b border-slate-200 bg-white">
@@ -300,7 +309,7 @@ export default function RedeemPage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-5 py-10 sm:py-16">
-        <div className="grid gap-6 lg:grid-cols-[1fr,380px]">
+        <div>
           {/* 左侧主内容区 */}
           <div>
             <div className="mb-8 text-center lg:text-left">
@@ -498,12 +507,17 @@ export default function RedeemPage() {
         </section>
 
         {state === "success" && (
-          <section className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-center">
-            <CheckCircle2 className="mx-auto h-9 w-9 text-emerald-600" />
-            <h2 className="mt-3 text-xl font-black text-emerald-950">兑换完成</h2>
-            <p className="mt-2 text-sm text-emerald-800">请回到 ChatGPT 刷新页面，确认套餐权益已经生效。</p>
-            {orderId && <p className="mt-3 font-mono text-xs text-emerald-700">订单号：{orderId}</p>}
-          </section>
+          <div className="mt-6 grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_380px]">
+            <section className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+              <CheckCircle2 className="mx-auto h-9 w-9 text-emerald-600" />
+              <h2 className="mt-3 text-xl font-black text-emerald-950">兑换完成</h2>
+              <p className="mt-2 text-sm text-emerald-800">请回到 ChatGPT 刷新页面，确认套餐权益已经生效。</p>
+              {orderId && <p className="mt-3 font-mono text-xs text-emerald-700">订单号：{orderId}</p>}
+            </section>
+            <div ref={renewalOfferRef} className="scroll-mt-24">
+              <RenewalOffer />
+            </div>
+          </div>
         )}
 
         {state === "error" && (
@@ -554,53 +568,51 @@ export default function RedeemPage() {
         </div>
       </div>
 
-      {/* 右侧边栏 - 只在成功时显示 */}
-      {state === "success" && (
-        <div className="hidden lg:block">
-          <div className="sticky top-6">
-            <div className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 shadow-sm">
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600">
-                  <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-black text-slate-900">🎁 续费专属优惠</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-700">
-                  添加客服微信领取专属优惠资格
-                </p>
-                <div className="mt-4 space-y-2">
-                  <div className="rounded-xl bg-white/80 px-4 py-3 text-sm">
-                    <div className="font-bold text-indigo-600">ChatGPT Plus</div>
-                    <div className="text-2xl font-black text-indigo-700">¥139</div>
-                    <div className="text-xs text-slate-500">下次续费可享</div>
-                  </div>
-                  <div className="rounded-xl bg-white/80 px-4 py-3 text-sm">
-                    <div className="font-bold text-purple-600">Pro 用户</div>
-                    <div className="text-2xl font-black text-purple-700">立减 ¥20</div>
-                    <div className="text-xs text-slate-500">专属折扣</div>
-                  </div>
-                </div>
-                <a
-                  href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3.5 text-sm font-bold text-white shadow-lg transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl"
-                >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                  </svg>
-                  添加企业微信客服
-                </a>
-                <p className="mt-3 text-xs text-slate-500">客服在线时间：9:00 - 22:00</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
       </main>
     </div>
+  );
+}
+
+function RenewalOffer() {
+  return (
+    <section className="rounded-3xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-6 shadow-sm">
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600">
+          <svg className="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-black text-slate-900">🎁 续费专属优惠</h3>
+        <p className="mt-3 text-sm leading-relaxed text-slate-700">
+          添加客服微信领取专属优惠资格
+        </p>
+        <div className="mt-4 space-y-2">
+          <div className="rounded-xl bg-white/80 px-4 py-3 text-sm">
+            <div className="font-bold text-indigo-600">ChatGPT Plus</div>
+            <div className="text-2xl font-black text-indigo-700">¥139</div>
+            <div className="text-xs text-slate-500">下次续费可享</div>
+          </div>
+          <div className="rounded-xl bg-white/80 px-4 py-3 text-sm">
+            <div className="font-bold text-purple-600">Pro 用户</div>
+            <div className="text-2xl font-black text-purple-700">立减 ¥20</div>
+            <div className="text-xs text-slate-500">专属折扣</div>
+          </div>
+        </div>
+        <a
+          href="https://work.weixin.qq.com/ca/cawcde79046e43fa0b"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3.5 text-sm font-bold text-white shadow-lg transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl"
+        >
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+          </svg>
+          添加企业微信客服
+        </a>
+        <p className="mt-3 text-xs text-slate-500">客服在线时间：9:00 - 22:00</p>
+      </div>
+    </section>
   );
 }
 
