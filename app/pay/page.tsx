@@ -111,7 +111,7 @@ export default function PayPage() {
           ["paid", "delivering", "delivered"].includes(data.order.status)
         ) {
           setPaid(true);
-          window.location.href = `/recharge?order_id=${encodeURIComponent(draft.orderId!)}`;
+          window.location.href = "https://829.cc.cd";
         }
       } catch {
         // Keep polling; a transient network failure should not interrupt payment.
